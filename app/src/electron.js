@@ -16,8 +16,6 @@ const path = require('path');
 const url = require('url');
 const mainMenuDefinition = require('./mainMenuDefinition');
 
-const { getErrorCategory } = require('./errorCategory');
-
 // require('@electron/remote/main').initialize();
 
 const configRootPath = path.join(app.getPath('userData'), 'config-root.json');
@@ -162,6 +160,7 @@ ipcMain.on('update-commands', async (event, arg) => {
   commands = parsed.commands;
   const isModalOpened = parsed.isModalOpened;
   const dbgatePage = parsed.dbgatePage;
+  if (!mainMenu) return;
   for (const key of Object.keys(commands)) {
     const menu = mainMenu.getMenuItemById(key);
     if (!menu) continue;

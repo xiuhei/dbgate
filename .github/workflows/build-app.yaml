@@ -20,6 +20,7 @@ jobs:
       - run: yarn install --frozen-lockfile --network-timeout 100000
       - run: yarn test:local-api
       - run: yarn build:app
+      - run: yarn --cwd app test:startup
       - uses: actions/upload-artifact@v4
         with:
           name: windows-x64

@@ -48,11 +48,14 @@ API 单元测试位于 `packages/api/src`，GUI 使用 `e2e-tests` 中的 Cypres
 
 ```powershell
 yarn test:local-api
+yarn --cwd app test:startup
 yarn --cwd e2e-tests install
 yarn --cwd e2e-tests test:local-tool
 ```
 
 先完成桌面打包，再运行本地工具回归测试。测试命令使用已构建的 Electron 启动独立测试服务，监听 `127.0.0.1:3000`，并将测试数据写入临时目录。测试使用 SQLite，不需要安装外部数据库服务器。
+
+`test:startup` 加载打包后的桌面主入口，检查窗口、设置页、Electron 通信及 SQLite 查询。测试使用独立的临时数据目录。
 
 ## 数据与连接
 

@@ -96,7 +96,8 @@
     "postinstall": "yarn rebuild && patch-package",
     "prerebuild": "node -e \"const fs = require('fs'); for (const dir of ['node_modules/cpu-features', '../node_modules/cpu-features']) fs.rmSync(dir, { recursive: true, force: true })\"",
     "rebuild": "electron-builder install-app-deps",
-    "predist": "node prepareDist.js"
+    "predist": "node prepareDist.js",
+    "test:startup": "node testStartup.js"
   },
   "main": "src/electron.js",
   "devDependencies": {

@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const volatilePackages = require('./common/volatilePackages');
 
-function adjustFile(file) {
+function adjustFile(file, isApp = false) {
   const json = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }));
 
   function processPackageFile(packageFile) {
@@ -45,4 +45,4 @@ function adjustFile(file) {
 }
 
 adjustFile('packages/api/package.json');
-adjustFile('app/package.json');
+adjustFile('app/package.json', true);
