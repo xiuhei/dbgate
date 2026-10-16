@@ -46,9 +46,7 @@
     'icon minus-thick': 'mdi mdi-minus-thick',
     'icon invisible-box': 'mdi mdi-minus-box-outline icon-invisible',
     'icon cloud-upload': 'mdi mdi-cloud-upload',
-    'icon cloud': 'mdi mdi-cloud',
-    'icon cloud-public': 'mdi mdi-cloud-search',
-    'icon cloud-private': 'mdi mdi-cloud-key',
+
     'icon import': 'mdi mdi-application-import',
     'icon export': 'mdi mdi-application-export',
     'icon new-connection': 'mdi mdi-database-plus',
@@ -135,9 +133,6 @@
     'icon team-folder': 'mdi mdi-account-details',
     'icon graphql': 'mdi mdi-graphql',
 
-    'icon cloud-account': 'mdi mdi-account-remove-outline',
-    'icon cloud-account-connected': 'mdi mdi-account-check-outline',
-
     'icon edit': 'mdi mdi-pencil',
     'icon delete': 'mdi mdi-delete',
     'icon arrow-up': 'mdi mdi-arrow-up',
@@ -177,8 +172,7 @@
     'icon parent-filter-outline': 'mdi mdi-home-alert-outline',
     'icon download': 'mdi mdi-download',
     'icon text': 'mdi mdi-text',
-    'icon ai-provider': 'mdi mdi-cloud-cog',
-    'icon ai': 'mdi mdi-head-lightbulb',
+
     'icon wait': 'mdi mdi-timer-sand',
     'icon more': 'mdi mdi-more',
     'icon copy': 'mdi mdi-content-copy',
@@ -258,13 +252,12 @@
     'icon autocommit-on': 'mdi mdi-check-circle',
     'icon autocommit-off': 'mdi mdi-check-circle-outline',
 
-    'icon premium': 'mdi mdi-star',
     'icon upload': 'mdi mdi-upload',
     'icon limit': 'mdi mdi-car-speed-limiter',
     'icon api': 'mdi mdi-api',
 
     'icon chart': 'mdi mdi-chart-bar',
-    'icon cloud-connection': 'mdi mdi-cloud-lock',
+
     'icon diagram': 'mdi mdi-graph',
 
     'img ok': 'mdi mdi-check-circle color-icon-green',
@@ -307,9 +300,7 @@
     'img role': 'mdi mdi-account-group color-icon-blue',
     'img admin': 'mdi mdi-security color-icon-blue',
     'img auth': 'mdi mdi-account-key color-icon-blue',
-    'img cloud-connection': 'mdi mdi-cloud-lock color-icon-blue',
-    'img ai': 'mdi mdi-head-lightbulb color-icon-yellow',
-    'img ai-provider': 'mdi mdi-head-lightbulb color-icon-blue',
+
     'img run': 'mdi mdi-play color-icon-blue',
 
     'img add': 'mdi mdi-plus-circle color-icon-green',

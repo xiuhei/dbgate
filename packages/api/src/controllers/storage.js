@@ -32,8 +32,6 @@ module.exports = {
     return null;
   },
 
-  startRefreshLicense() {},
-
   async getUsedEngines() {
     return null;
   },
@@ -58,11 +56,4 @@ module.exports = {
     return permissions ?? [];
   },
 
-  async storageCheckMcpConnectionAccess(req, conid) {
-    return false;
-  },
-
-  getMcpAuthProvider() {
-    return null;
-  },
 };

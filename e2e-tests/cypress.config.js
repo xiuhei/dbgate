@@ -46,17 +46,8 @@ module.exports = defineConfig({
             case 'multi-sql':
               serverProcess = exec('yarn start:multi-sql');
               break;
-            case 'cloud':
-              serverProcess = exec('yarn start:cloud');
-              break;
-            case 'charts':
-              serverProcess = exec('yarn start:charts');
-              break;
             case 'redis':
               serverProcess = exec('yarn start:redis');
-              break;
-            case 'ai-chat':
-              serverProcess = exec('yarn start:ai-chat');
               break;
           }
 

@@ -5,7 +5,6 @@ import * as TableStructureTab from './TableStructureTab.svelte';
 import * as QueryTab from './QueryTab.svelte';
 import * as ShellTab from './ShellTab.svelte';
 import * as ArchiveFileTab from './ArchiveFileTab.svelte';
-import * as PluginTab from './PluginTab.svelte';
 import * as MarkdownEditorTab from './MarkdownEditorTab.svelte';
 import * as MarkdownViewTab from './MarkdownViewTab.svelte';
 import * as MarkdownPreviewTab from './MarkdownPreviewTab.svelte';
@@ -15,7 +14,6 @@ import * as YamlEditorTab from './YamlEditorTab.svelte';
 import * as JsonEditorTab from './JsonEditorTab.svelte';
 import * as JsonLinesEditorTab from './JsonLinesEditorTab.svelte';
 import * as JsonTab from './JsonTab.svelte';
-import * as ChangelogTab from './ChangelogTab.svelte';
 import * as DiagramTab from './DiagramTab.svelte';
 import * as RedisKeyDetailTab from './RedisKeyDetailTab.svelte';
 import * as NewRedisKeyTab from './NewRedisKeyTab.svelte';
@@ -30,8 +28,6 @@ import * as SettingsTab from './SettingsTab.svelte';
 import * as BackupDatabaseTab from './BackupDatabaseTab.svelte';
 import * as RestoreDatabaseTab from './RestoreDatabaseTab.svelte';
 
-import protabs from './index-pro';
-
 export default {
   TableDataTab,
   CollectionDataTab,
@@ -40,7 +36,6 @@ export default {
   QueryTab,
   ShellTab,
   ArchiveFileTab,
-  PluginTab,
   MarkdownEditorTab,
   MarkdownViewTab,
   MarkdownPreviewTab,
@@ -50,7 +45,6 @@ export default {
   JsonEditorTab,
   JsonLinesEditorTab,
   JsonTab,
-  ChangelogTab,
   DiagramTab,
   RedisKeyDetailTab,
   NewRedisKeyTab,
@@ -64,5 +58,4 @@ export default {
   SettingsTab,
   BackupDatabaseTab,
   RestoreDatabaseTab,
-  ...protabs,
 };

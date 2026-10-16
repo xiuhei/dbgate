@@ -17,11 +17,9 @@
   import FormButton from '../forms/FormButton.svelte';
   import { apiCall } from '../utility/api';
   import { _t } from '../translations';
-  import { getFavoriteKind, trackFavorite } from '../utility/favoriteUsage';
 
   export let editingData;
   export let savingTab;
-  /** Where adding was started from, for usage analytics: command or tab_menu. */
   export let source = 'command';
 
   const electron = getElectron();
@@ -80,11 +78,7 @@
       data,
     });
     if (resp?.errorMessage) return;
-    trackFavorite('add', savingTab, {
-      param: source,
-      result: getFavoriteKind(savingTab, values.whatToSave),
-      value: values.openOnStartup ? 1 : 0,
-    });
+
   };
 
   const saveFile = async values => {
@@ -104,7 +98,7 @@
       },
     });
     if (resp?.errorMessage) return;
-    trackFavorite('edit', editingData, { value: values.openOnStartup ? 1 : 0 });
+
   };
 
   const handleSubmit = async ev => {
@@ -119,7 +113,7 @@
 
   const handleCopyLink = async ev => {
     const tabdata = await getTabSaveData(ev.detail);
-    trackFavorite('share_link', savingTab, { param: 'modal' });
+
     copyTextToClipboard(`${document.location.origin}#tabdata=${encodeURIComponent(JSON.stringify(tabdata))}`);
   };
 </script>

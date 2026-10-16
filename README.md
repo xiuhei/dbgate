@@ -1,212 +1,61 @@
-[![NPM version](https://img.shields.io/npm/v/dbgate-serve.svg)](https://www.npmjs.com/package/dbgate-serve)
-![GitHub All Releases](https://img.shields.io/github/downloads/dbgate/dbgate/total) 
-[![dbgate](https://snapcraft.io/dbgate/badge.svg)](https://snapcraft.io/dbgate)
-[![dbgate](https://snapcraft.io/dbgate/trending.svg?name=0)](https://snapcraft.io/dbgate)
-[![styled with prettier](https://img.shields.io/badge/styled_with-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
+# DbGate 本地数据库工具
 
-<img src="https://raw.githubusercontent.com/dbgate/dbgate/master/app/icon.png" width="64" align="right"/>
+DbGate 是本地运行的数据库管理工具，使用 Electron、Svelte 4 和 Node.js。数据库连接、设置、SQL 文件和查询历史保存在本机。
 
-# DbGate - (no)SQL database client
+支持 SQL 编辑与执行、数据浏览与修改、表结构管理、ER 图、文件导入导出、数据库备份恢复，以及 SSH 隧道和 TLS 连接。内置 MySQL、PostgreSQL、SQL Server、SQLite、DuckDB、MongoDB、Redis 等数据库驱动。
 
-DbGate is cross-platform database manager. 
-It's designed to be simple to use and effective, when working with more databases simultaneously.
-But there are also many advanced features like schema compare, visual query designer, chart visualisation or batch export and import.
+## 开发环境
 
-DbGate is licensed under GPL-3.0 license and is free to use for any purpose.
+- Node.js 24.x
+- Yarn Classic 1.22.x
+- Windows 原生模块构建需要 Python 和 Visual Studio C++ 桌面开发工具及 Windows SDK
 
-* Try it online - [demo.dbgate.org](https://demo.dbgate.org) - online demo application
-* **Download** application for Windows, Linux or Mac from [dbgate.io](https://www.dbgate.io/download/)
-* Looking for DbGate Community? **Download** from [dbgate.io](https://www.dbgate.io/download-community/)
-* Run web version as [NPM package](https://www.npmjs.com/package/dbgate-serve) or as [docker image](https://hub.docker.com/r/dbgate/dbgate)
-* Use nodeJs [scripting interface](https://docs.dbgate.io/scripting) ([API documentation](https://docs.dbgate.io/apidoc))
-
-## Supported databases
-* MySQL
-* PostgreSQL
-* SQL Server
-* Oracle
-* MongoDB
-* Redis
-* SQLite
-* Amazon Redshift (Premium)
-* CockroachDB
-* MariaDB
-* CosmosDB (Premium)
-* ClickHouse
-* Apache Cassandra
-* libSQL/Turso (Premium)
-* DuckDB
-* Firebird
-* Firestore (Premium)
-
-
-<a href="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot1.png">
-    <img src="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot1.png" width="400"/>
-</a>
-<a href="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot2.png">
-    <img src="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot2.png" width="400"/>
-</a>
-<a href="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot4.png">
-    <img src="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot4.png" width="400"/>
-</a>
-<a href="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot3.png">
-    <img src="https://raw.githubusercontent.com/dbgate/dbgate/master/img/screenshot3.png" width="400"/>
-</a>
-
-<!-- ![Screenshot](https://raw.githubusercontent.com/dbgate/dbgate/master/screenshot.png) -->
-
-## Features
-* Browse table data with many filtering options, Excel-like filters, multi-value filters
-* Table data editing, with SQL change script preview
-* Edit table schema, indexes, primary and foreign keys
-* Compare and synchronize database structure
-* ER diagram
-* Light and dark theme, next themes available from DbGate Cloud
-* Huge support for work with related data - master/detail views, foreign key lookups, expanding columns from related tables in flat data view
-* Query designer - visual SQL query builder without writing SQL code. Complex conditions like WHERE NOT EXISTS.
-* Query perspectives – innovative nested table view over complex relational data, something like query designer on MongoDB databases
-* Form view for comfortable work with tables with many columns
-* JSON view on MongoDB collections
-* Explore tables, views, procedures, functions, MongoDB collections
-* SQL editor
-  * execute SQL script
-  * SQL code formatter
-  * SQL code completion
-  * Add SQL LEFT/INNER/RIGHT join utility
-* Mongo JavaScript editor, execute Mongo script (with NodeJs syntax)
-* Redis tree view, generate script from keys, run Redis script
-* Runs as application for Windows, Linux and Mac. Or in Docker container on server and in web Browser on client.
-* Import, export from/to CSV, Excel, JSON, NDJSON, XML, DBF
-* Archives - backup your data in NDJSON files on local filesystem (or on DbGate server, when using web application)
-* NDJSON data viewer and editor - browse NDJSON data, edit data and structure directly on NDJSON files. Works also for big NDSON files
-* Charts, export chart to HTML page
-* AI powered database chat
-* Show GEO data on map, export map to HTML page
-* For detailed info, how to run DbGate in docker container, visit [docker hub](https://hub.docker.com/r/dbgate/dbgate)
-* Extensible plugin architecture
-
-## How to contribute
-Any contributions are welcome. If you want to contribute without coding, consider following:
-
-* Tell your friends about DbGate or share on social networks - when more people will use DbGate, it will grow to be better
-* Purchase a [DbGate Premium](https://www.dbgate.io/purchase/premium/) license
-* Create issue, if you find problem in app, or you have idea to new feature. If issue already exists, you could leave comment on it, to prioritise most wanted issues
-* Create some tutorial video on [youtube](https://www.youtube.com/playlist?list=PLCo7KjCVXhr0RfUSjM9wJMsp_ShL1q61A)
-* Become a backer on [GitHub sponsors](https://github.com/sponsors/dbgate) or [Open collective](https://opencollective.com/dbgate)
-* Add a SQL script to [Public Knowledge Base](https://github.com/dbgate/dbgate-knowledge-base)
-* Where a small coding is acceptable for you, you could [create plugin](https://docs.dbgate.io/plugin-development)
-* Create a new custom theme and share it on [DbGate Cloud](https://github.com/dbgate/dbgate-knowledge-base/tree/master/folder-Themes)
-
-Thank you!
-
-## Why is DbGate different
-There are many database managers now, so why DbGate? 
-* Works everywhere - Windows, Linux, Mac, Web browser (+mobile web is planned), without compromises in features
-* Based on standalone NPM packages, scripts can be run without DbGate (example - [CSV export](https://www.npmjs.com/package/dbgate-plugin-csv) )
-* Many data browsing functions based using foreign keys - master/detail, expand columns, expandable form view
-
-## Design goals
-* Application simplicity - DbGate takes the best and only the best from old DbGate, [DatAdmin](https://www.softpedia.com/get/Internet/Servers/Database-Utils/DatAdmin-Personal.shtml), [DbMouse](https://www.softpedia.com/get/Internet/Servers/Database-Utils/DbMouse.shtml) and [SQL Database Studio](https://en.wikipedia.org/wiki/SQL_Database_Studio)
-* Minimal dependencies
-    * Frontend - Svelte
-    * Backend - NodeJs, ExpressJs, database connection drivers
-    * JavaScript + TypeScript
-    * App - electron
-* Platform independent - runs as web application in single docker container on server, or as application using Electron platform on Linux, Windows and Mac
-
-<!-- ## Plugins
-Plugins are standard NPM packages published on [npmjs.com](https://www.npmjs.com).  
-See all [existing DbGate plugins](https://www.npmjs.com/search?q=keywords:dbgateplugin).  
-Visit [dbgate generator homepage](https://github.com/dbgate/generator-dbgate) to see, how to create your own plugin.  
-
-Currently following extensions can be implemented using plugins:
-- File format parsers/writers
-- Database engine connectors
-
-Basic set of plugins is part of DbGate git repository and is installed with app. Additional plugins pust be downloaded from NPM (this task is handled by DbGate) -->
-
-## How to run development environment
-
-Simple variant - runs WEB application:
-```sh
-yarn
+```powershell
+yarn install
 yarn start
 ```
 
-If you want more control, run WEB application:
-```sh
-yarn # install NPM packages
+桌面开发需要在 `app` 目录安装 Electron 依赖，然后分别运行前端、库监听和桌面程序：
+
+```powershell
+yarn --cwd app install
+yarn start:web
+yarn lib
+yarn start:app
 ```
 
-And than run following 3 commands concurrently in 3 terminals:
-```
-yarn start:api # run API on port 3000
-yarn start:web # run web on port 5001
-yarn lib # watch typescript libraries and plugins modifications
-```
-This runs API on port 3000 and web application on port 5001  
-Open http://localhost:5001 in your browser
+## 桌面打包
 
-If you want to run electron app:
-```sh
-yarn # install NPM packages
-cd app
-yarn # install NPM packages for electron
+```powershell
+yarn install
+yarn build:app
 ```
 
-And than run following 3 commands concurrently in 3 terminals:
-```
-yarn start:web # run web on port 5001 (only static JS and HTML files)
-yarn lib # watch typescript libraries and plugins modifications
-yarn start:app # run electron app
-```
+构建脚本准备数据库驱动和内置插件，编译前后端，并使用 electron-builder 生成当前平台的桌面程序。Windows 默认生成 x64 的 NSIS 安装包和 ZIP，输出到 `app/dist`。
 
-## How to run built electron app locally
-This mode is very similar to production run of electron app. Electron doesn't use localhost:5001.
+下载 Electron 和打包工具时，命令行需要能够访问 GitHub。使用代理时，在当前 PowerShell 会话配置代理地址：
 
-```sh
-cd app
-yarn
+```powershell
+$env:HTTP_PROXY = 'http://127.0.0.1:端口'
+$env:HTTPS_PROXY = $env:HTTP_PROXY
+$env:ELECTRON_GET_USE_PROXY = '1'
+yarn build:app
 ```
 
-```sh
-yarn
-yarn build:app:local
-yarn start:app:local
+## 测试
+
+API 单元测试位于 `packages/api/src`，GUI 使用 `e2e-tests` 中的 Cypress 测试。本地工具的回归检查位于 `e2e-tests/cypress/e2e/local-tool.cy.js`。
+
+```powershell
+yarn test:local-api
+yarn --cwd e2e-tests install
+yarn --cwd e2e-tests test:local-tool
 ```
 
-## Running tests
+先完成桌面打包，再运行本地工具回归测试。测试命令使用已构建的 Electron 启动独立测试服务，监听 `127.0.0.1:3000`，并将测试数据写入临时目录。测试使用 SQLite，不需要安装外部数据库服务器。
 
-Unit tests (e.g. in `dbgate-tools`):
-```sh
-yarn workspace dbgate-tools test
-```
+## 数据与连接
 
-Integration tests (requires Docker):
-```sh
-cd integration-tests
-yarn test:local                                        # run all tests
-yarn test:local:path __tests__/alter-database.spec.js  # run a single test file
-```
+默认数据目录是用户主目录下的 `.dbgate`。通过 `WORKSPACE_DIR` 可以指定独立的数据目录。数据库密码、SSH 和云数据库凭据仅用于用户配置的数据库连接。
 
-E2E tests (Cypress):
-```sh
-yarn cy:open
-```
-
-## How to create plugin
-Creating plugin is described in [documentation](https://docs.dbgate.io/plugin-development)
-
-But it is very simple:
-
-```sh
-npm install -g yo # install yeoman
-npm install -g generator-dbgate # install dbgate generator
-cd dbgate-plugin-my-new-plugin # this directory is created by wizard, edit, what you need to change
-yarn plugin # this compiles plugin and copies it into existing DbGate installation
-```
-
-After restarting DbGate, you could use your new plugin from DbGate.
-
-## Logging
-DbGate uses [pinomin logger](https://github.com/dbgate/pinomin). So by default, it produces JSON log messages into console and log files. If you want to see formatted logs, please use [pino-pretty](https://github.com/pinojs/pino-pretty) log formatter.
+本项目基于 [DbGate](https://github.com/dbgate/dbgate)，使用 GPL-3.0 许可证，参见 [LICENSE](LICENSE)。

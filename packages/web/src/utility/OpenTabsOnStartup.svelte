@@ -8,9 +8,6 @@
 
   import { getConfig, getConnectionList, useFavorites } from './metadataLoaders';
   import openNewTab from './openNewTab';
-  import { showSnackbarInfo } from './snackbar';
-  import { trackFavorite } from './favoriteUsage';
-  import { trackUsage } from './usageAnalytics';
 
   $: favorites = useFavorites();
   let opened = false;
@@ -26,13 +23,6 @@
     if (opened) return;
 
     opened = true;
-    trackUsage({ feature: 'favorites', action: 'count', param: 'all', value: list.length });
-    trackUsage({
-      feature: 'favorites',
-      action: 'count',
-      param: 'open_on_startup',
-      value: list.filter(x => x.openOnStartup).length,
-    });
 
     const { hash } = document.location;
     const openFavoriteName = hash && hash.startsWith('#favorite=') ? hash.substring('#favorite='.length) : null;
@@ -50,7 +40,7 @@
         openFavorite(json, 'share_link');
         window.history.replaceState(null, null, ' ');
       } catch (err) {
-        trackFavorite('open', null, { param: 'share_link', result: 'error' });
+
         showModal(ErrorMessageModal, { message: err.message });
       }
     } else if (!$openedTabs.find(x => x.closedTime == null)) {
@@ -71,12 +61,5 @@
       });
     }
 
-    const config = await getConfig();
-    const appVersion = localStorage.getItem('appVersion');
-    if (appVersion && appVersion != config.version) {
-      runCommand('tabs.changelog');
-      showSnackbarInfo(`DbGate upgraded from version ${appVersion} to version ${config.version}`);
-    }
-    localStorage.setItem('appVersion', config.version);
   }
 </script>

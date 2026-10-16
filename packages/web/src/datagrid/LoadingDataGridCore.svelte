@@ -3,7 +3,7 @@
   import { onDestroy } from 'svelte';
 
   import createRef from '../utility/createRef';
-  import { useSettings } from '../utility/metadataLoaders';
+
   import { fetchAll, type FetchAllHandle } from '../utility/fetchAll';
   import { apiCall } from '../utility/api';
 

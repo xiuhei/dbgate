@@ -27,7 +27,6 @@ const { rundir } = require('../utility/directories');
 const fs = require('fs-extra');
 const { changeSetToSql } = require('dbgate-datalib');
 const _ = require('lodash');
-const { limitServerChatQueryResult } = require('../utility/serverChatQuery');
 
 const logger = getLogger('dbconnProcess');
 
@@ -280,32 +279,6 @@ async function handleQueryData({ msgid, sql, range, commandTimeout }, skipReadon
       msgtype: 'response',
       msgid,
       errorMessage: extractErrorMessage(err, 'Error executing SQL script'),
-    });
-  }
-}
-
-async function handleServerChatQueryData({ msgid, sql }) {
-  await waitConnected();
-  const driver = requireEngineDriver(storedConnection);
-  try {
-    ensureExecuteCustomScript(driver);
-    const res = await driver.query(dbhan, sql);
-    if (res?.columns) {
-      res.columns = await enrichQueryResultColumns({
-        dbhan,
-        driver,
-        sql,
-        columns: res.columns,
-        dbinfo: analysedStructure,
-      });
-    }
-    const limitedResult = limitServerChatQueryResult(res);
-    process.send({ msgtype: 'response', msgid, ...serializeJsTypesForJsonStringify(limitedResult) });
-  } catch (err) {
-    process.send({
-      msgtype: 'response',
-      msgid,
-      errorMessage: extractErrorMessage(err, 'DBGM-00000 Error executing server chat database SQL'),
     });
   }
 }
@@ -738,7 +711,7 @@ function handlePing() {
 const messageHandlers = {
   connect: handleConnect,
   queryData: handleQueryData,
-  serverChatQueryData: handleServerChatQueryData,
+
   runScript: handleRunScript,
   runOperation: handleRunOperation,
   updateCollection: handleUpdateCollection,

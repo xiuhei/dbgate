@@ -12,13 +12,7 @@ class AuthProviderBase {
   amoid = 'none';
   skipInList = false;
 
-  // The amoid of the provider whose login() runs is chosen by the client (auth/login,
-  // connections/dblogin-auth, ...), so a provider that does not check credentials itself must not
-  // hand out a session token here. Redirect-based providers (OAuth, Google, MS Entra) issue tokens
-  // from oauthToken(), the superadmin token is issued only after the admin password check in
-  // controllers/auth.js, and MCP tokens come from the MCP OAuth flow - none of them may be logged
-  // into with this method. Providers that verify credentials, or are deliberately anonymous,
-  // override it.
+  // Providers that do not verify credentials must not issue a session token here.
   async login(login, password, options = undefined, req = undefined) {
     return { error: 'Login is not supported for this authentication method' };
   }
@@ -366,12 +360,7 @@ function getDefaultAuthProvider() {
 
 function getAuthProviderFromReq(req) {
   const authProviderId = req?.auth?.amoid || req?.user?.amoid;
-  if (authProviderId == 'mcp') {
-    // Team Premium provides a storage-backed MCP auth provider. Community
-    // stubs getMcpAuthProvider() as null, so fall back to the default provider
-    // so MCP tool calls can resolve permissions (DBGM-00355).
-    return require('../controllers/storage').getMcpAuthProvider() ?? getDefaultAuthProvider();
-  }
+
   return getAuthProviderById(authProviderId) ?? getDefaultAuthProvider();
 }
 

@@ -44,7 +44,7 @@
   registerCommand({
     id: 'dataGrid.toggleCellDataView',
     // The editor reports the resulting state itself.
-    usageAnalytics: false,
+
     category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
     name: __t('command.datagrid.toggleCellDataView', { defaultMessage: 'Toggle cell data view' }),
     toolbarName: __t('command.datagrid.toggleCellDataView.toolbar', { defaultMessage: 'Cell Data' }),
@@ -66,8 +66,7 @@
 
 <script lang="ts">
   import { getContext, setContext } from 'svelte';
-  import { trackUsage } from '../utility/usageAnalytics';
-  import { getCommandSource } from '../commands/commandSource';
+
   import { writable } from 'svelte/store';
 
   import HorizontalSplitter from '../elements/HorizontalSplitter.svelte';
@@ -85,7 +84,7 @@
   import { registerMenu } from '../utility/contextMenu';
   import { getLocalStorage, setLocalStorage } from '../utility/storageCache';
   import { _t } from '../translations';
-  import { isProApp } from '../utility/proTools';
+
   import CellDataWidget from '../widgets/CellDataWidget.svelte';
   import { useSettings } from '../utility/metadataLoaders';
 
@@ -130,7 +129,6 @@
   const collapsedLeftColumnStore =
     getContext('collapsedLeftColumnStore') || writable(getLocalStorage('dataGrid_collapsedLeftColumn', false));
   const settings = useSettings();
-  const usageTabId = getContext('tabid');
 
   $: isFormView = !!config?.isFormView;
   $: isJsonView = !!config?.isJsonView;
@@ -176,15 +174,7 @@
     // Reopening an already visible view is not a new event.
     if (cellDataViewVisible) return;
     cellDataViewVisible = true;
-    trackUsage(
-      {
-        feature: 'data_grid',
-        action: 'show_cell_data_view',
-        engine: display?.driver?.engine,
-        param: reason,
-      },
-      usageTabId
-    );
+
   }
 
   export function toggleCellDataView() {
@@ -261,7 +251,7 @@
         name="references"
         height="30%"
         collapsed={isDetailView}
-        skip={!(showReferences && display?.hasReferences && isProApp())}
+        skip={!(showReferences && display?.hasReferences && false)}
         data-testid="DataGrid_itemReferences"
         altsidebar
       >
@@ -271,7 +261,7 @@
       <WidgetColumnBarItem
         title={_t('dataGrid.macros', { defaultMessage: 'Macros' })}
         name="macros"
-        skip={!(showMacros && isProApp())}
+        skip={!(showMacros && false)}
         collapsed={!expandMacros}
         data-testid="DataGrid_itemMacros"
         height="20%"

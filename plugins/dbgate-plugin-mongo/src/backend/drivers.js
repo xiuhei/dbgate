@@ -15,8 +15,6 @@ const {
   convertToMongoSort,
 } = require('../frontend/convertToMongoCondition');
 
-let isProApp;
-
 const logger = getLogger('mongoDriver');
 
 function serializeMongoData(row, driverBase) {
@@ -168,27 +166,7 @@ const drivers = driverBases.map((driverBase) => ({
   },
   async script(dbhan, sql) {
     // MongoSH should be used only in stream method
-    // if (isProApp) {
-    //   const { NodeDriverServiceProvider } = require('@mongosh/service-provider-node-driver');
-    //   const { ElectronRuntime } = require('@mongosh/browser-runtime-electron');
 
-    //   const connectionString = ensureDatabaseInMongoURI(dbhan.client.s.url, dbhan.database);
-    //   const serviceProvider = await NodeDriverServiceProvider.connect(connectionString);
-    //   const runtime = new ElectronRuntime(serviceProvider);
-    //   const exprValue = await runtime.evaluate(sql);
-
-    //   const { printable } = exprValue;
-
-    //   if (Array.isArray(printable)) {
-    //     return printable;
-    //   } else if ('documents' in printable) {
-    //     return printable.documents;
-    //   } else if ('cursor' in printable && 'firstBatch' in printable.cursor) {
-    //     return printable.cursor.firstBatch;
-    //   }
-
-    //   return printable;
-    // }
     // NOTE: this is a direct eval, so the evaluated text has this module's scope - including
     // require - in reach. The MongoDB query language is JavaScript, so user text does have to
     // be evaluated, but that means reaching this function is equivalent to running code on the
@@ -253,87 +231,7 @@ const drivers = driverBases.map((driverBase) => ({
     }
   },
   async stream(dbhan, sql, options) {
-    if (isProApp()) {
-      const { NodeDriverServiceProvider } = require('@mongosh/service-provider-node-driver');
-      const { ElectronRuntime } = require('@mongosh/browser-runtime-electron');
-
-      let exprValue;
-
-      try {
-        const serviceProvider = new NodeDriverServiceProvider(dbhan.client, new EventEmitter(), {
-          productDocsLink: '',
-          productName: 'DbGate',
-        });
-        const runtime = new ElectronRuntime(serviceProvider);
-        await runtime.evaluate(`use ${dbhan.database}`);
-        exprValue = await runtime.evaluate(sql);
-      } catch (err) {
-        options.info({
-          message: 'Error evaluating expression: ' + err.message,
-          time: new Date(),
-          severity: 'error',
-        });
-        options.done();
-        return;
-      }
-
-      const { printable, type } = exprValue;
-
-      if (typeof printable === 'string') {
-        options.info({
-          time: new Date(),
-          severity: 'info',
-          message: printable,
-        });
-        options.done();
-        return;
-      } else if (typeof printable !== 'object' || printable === null) {
-        options.info({
-          printable: printable,
-          time: new Date(),
-          severity: 'info',
-          message: 'Query returned not supported value.',
-        });
-        options.done();
-        return;
-      }
-
-      if (type === 'Document') {
-        options.recordset({ __isDynamicStructure: true });
-        options.row(printable);
-      } else if (type === 'Cursor' || exprValue.type === 'AggregationCursor') {
-        options.recordset({ __isDynamicStructure: true });
-        for (const doc of printable.documents) {
-          options.row(doc);
-        }
-      } else {
-        if (Array.isArray(printable)) {
-          options.recordset({ __isDynamicStructure: true });
-          for (const row of printable) {
-            options.row(row);
-          }
-        } else if ('documents' in printable) {
-          options.recordset({ __isDynamicStructure: true });
-          for (const row of printable.documents) {
-            options.row(row);
-          }
-        } else if ('cursor' in printable && 'firstBatch' in printable.cursor) {
-          options.recordset({ __isDynamicStructure: true });
-          for (const row of printable.cursor.firstBatch) {
-            options.row(row);
-          }
-        } else {
-          options.info({
-            printable: printable,
-            time: new Date(),
-            severity: 'info',
-            message: 'Query returned not supported value.',
-          });
-        }
-      }
-
-      options.done();
-    } else {
+    {
       // NOTE: this is a direct eval, so the evaluated text has this module's scope - including
       // require - in reach. The MongoDB query language is JavaScript, so user text does have to
       // be evaluated, but that means reaching this function is equivalent to running code on the
@@ -825,7 +723,6 @@ const drivers = driverBases.map((driverBase) => ({
 }));
 
 drivers.initialize = (dbgateEnv) => {
-  isProApp = dbgateEnv.isProApp;
 };
 
 module.exports = drivers;

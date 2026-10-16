@@ -1,8 +1,8 @@
 import _ from 'lodash';
-import { arrayToHexString, stringifyCellValue } from 'dbgate-tools';
+import { stringifyCellValue } from 'dbgate-tools';
 import yaml from 'js-yaml';
 import type { DataEditorTypesBehaviour } from 'dbgate-types';
-import { __t, _t } from '../translations'
+import { __t } from '../translations'
 
 export function copyTextToClipboard(text) {
   const oldFocus = document.activeElement;

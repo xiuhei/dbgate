@@ -18,8 +18,7 @@
   } from '../utility/dictionaryDescriptionTools';
   import FormSelectField from '../forms/FormSelectField.svelte';
   import TargetApplicationSelect from '../forms/TargetApplicationSelect.svelte';
-  import { currentDatabase } from '../stores';
-  import { filterAppsForDatabase } from '../utility/appTools';
+
   import { apiCall } from '../utility/api';
   import { _t } from '../translations';
 

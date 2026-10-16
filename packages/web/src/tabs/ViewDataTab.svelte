@@ -43,7 +43,7 @@
   import DataGrid from '../datagrid/DataGrid.svelte';
   import SqlDataGridCore from '../datagrid/SqlDataGridCore.svelte';
   import SqlFormView from '../formview/SqlFormView.svelte';
-  import { getBoolSettingsValue } from '../settings/settingsTools';
+
   import { extensions } from '../stores';
   import {
     useConnectionInfo,
@@ -66,7 +66,7 @@
   import { apiCall } from '../utility/api';
   import createActivator from '../utility/createActivator';
   import { _t } from '../translations';
-  import { isProApp } from '../utility/proTools';
+
   import { getNumberIcon } from '../icons/FontIcon.svelte';
   import useEditorData from '../query/useEditorData';
   import { markTabSaved, markTabUnsaved } from '../utility/common';
@@ -118,7 +118,7 @@
           $serverVersion,
           $settingsValue,
           viewResultInfo,
-          isProApp() && !$connection?.isReadOnly
+          !$connection?.isReadOnly
         )
       : null;
 
@@ -162,7 +162,7 @@
   }
 
   export function canSave() {
-    return isProApp() && !!findEngineDriver($connection, $extensions) && !!$dbinfo && !!getSaveChangeSet();
+    return !!findEngineDriver($connection, $extensions) && !!$dbinfo && !!getSaveChangeSet();
   }
 
   export async function save() {

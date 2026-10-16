@@ -1,1 +1,0 @@
-This component is not available for DBGate Community

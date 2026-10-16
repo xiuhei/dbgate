@@ -8,13 +8,7 @@
     isCompositeGraphQlKind,
     unwrapNamedGraphQlType,
   } from '../utility/graphQlExplorerUtils';
-  import {
-    buildGraphQlQueryText,
-    parseGraphQlSelectionPaths,
-    type GraphQLExplorerFieldNode,
-    type GraphQLField,
-    type GraphQLType,
-  } from 'dbgate-rest';
+  import { parseGraphQlSelectionPaths, type GraphQLExplorerFieldNode, type GraphQLField, type GraphQLType } from 'dbgate-rest';
 
   export let conid;
   export let operationName: string | null = null;
@@ -329,7 +323,7 @@ ${typeRefSelection}
     // Handle __arg__ markers specially - __arg__ segments should be skipped when building parent paths
     const parts = path.split('.');
     const parents: string[] = [];
-    
+
     // Build paths, but filter out __arg__ markers
     const realParts: string[] = [];
     for (let i = 0; i < parts.length; i++) {
@@ -345,7 +339,7 @@ ${typeRefSelection}
         }
       }
     }
-    
+
     return parents;
   }
 
@@ -418,7 +412,7 @@ ${typeRefSelection}
         if (match) {
           const fieldPath = match[1];
           const argumentName = match[2];
-          
+
           // Find the field node to get the argument type
           const fieldNode = findNodeByPath(rootFields, fieldPath.split('.'));
           if (fieldNode && fieldNode.arguments) {
@@ -666,7 +660,7 @@ ${typeRefSelection}
     if (currentSourceOfTruth !== 'editor') return;
     const { fieldPaths, argumentPaths, argumentValues } = parseGraphQlSelectionPaths(text);
     preservedArgumentValues = argumentValues || {};
-    
+
     // Convert argumentPaths to new format with __arg__ markers
     // e.g., 'productCreate.product' -> 'productCreate.__arg__.product'
     const convertedArgumentPaths = argumentPaths.map(argPath => {
@@ -678,7 +672,7 @@ ${typeRefSelection}
       }
       return argPath;
     });
-    
+
     const allPaths = [...fieldPaths, ...convertedArgumentPaths];
     if (rootFields.length === 0) {
       pendingEditorPaths = { fieldPaths, argumentPaths: convertedArgumentPaths, argumentValues: argumentValues || {} };

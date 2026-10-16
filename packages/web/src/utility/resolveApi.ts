@@ -17,7 +17,7 @@ export function resolveApiHeaders() {
   const electron = getElectron();
 
   const res = {};
-  const accessToken = localStorage.getItem(isOneOfPage('admin', 'admin-license') ? 'adminAccessToken' : 'accessToken');
+  const accessToken = localStorage.getItem(isOneOfPage('admin') ? 'adminAccessToken' : 'accessToken');
   if (accessToken) {
     res['Authorization'] = `Bearer ${accessToken}`;
   }

@@ -49,7 +49,7 @@ const crypto = require('crypto');
 const loadModelTransform = require('../utility/loadModelTransform');
 const exportDbModelSql = require('../utility/exportDbModelSql');
 const axios = require('axios');
-const { callTextToSqlApi, callCompleteOnCursorApi, callRefactorSqlQueryApi } = require('../utility/authProxy');
+
 const { decryptConnection } = require('../utility/crypting');
 const platformInfo = require('../utility/platformInfo');
 const {
@@ -65,7 +65,6 @@ const jsldata = require('./jsldata');
 const { sendToAuditLog } = require('../utility/auditlog');
 const {
   extractConnectionSslParams,
-  decryptCloudConnection,
   createConnectionHttpClient,
 } = require('../utility/connectUtility');
 
@@ -301,15 +300,6 @@ module.exports = {
     return newOpened;
   },
 
-  async ensureStructureLoaded(conid, database) {
-    const conn = await this.ensureOpened(conid, database);
-    if (conn.isApiConnection || !conn.subprocess) {
-      return conn.structure ?? {};
-    }
-    const response = await this.sendRequest(conn, { msgtype: 'getStructure' });
-    return response.structure ?? conn.structure ?? {};
-  },
-
   /** @param {import('dbgate-types').OpenedDatabaseConnection} conn */
   sendRequest(conn, message, additionalData = {}) {
     const msgid = crypto.randomUUID();
@@ -336,11 +326,6 @@ module.exports = {
     // }
     const res = await this.sendRequest(opened, { msgtype: 'queryData', sql });
     return res;
-  },
-
-  async queryServerChatData({ conid, database, sql }) {
-    const opened = await this.ensureOpened(conid, database);
-    return this.sendRequest(opened, { msgtype: 'serverChatQueryData', sql });
   },
 
   sqlSelect_meta: true,
@@ -1003,49 +988,6 @@ module.exports = {
     return true;
   },
 
-  textToSql_meta: true,
-  async textToSql({ conid, database, text, dialect }) {
-    const existing = this.opened.find(x => x.conid == conid && x.database == database);
-    const { structure } = existing || {};
-    if (!structure) return { errorMessage: 'No database structure' };
-
-    const res = await callTextToSqlApi(text, structure, dialect);
-
-    if (!res?.sql) {
-      return { errorMessage: 'No SQL generated' };
-    }
-
-    return res;
-  },
-
-  completeOnCursor_meta: true,
-  async completeOnCursor({ conid, database, text, dialect, line }) {
-    const existing = this.opened.find(x => x.conid == conid && x.database == database);
-    const { structure } = existing || {};
-    if (!structure) return { errorMessage: 'No database structure' };
-    const res = await callCompleteOnCursorApi(text, structure, dialect, line);
-
-    if (!res?.variants) {
-      return { errorMessage: 'No SQL generated' };
-    }
-
-    return res;
-  },
-
-  refactorSqlQuery_meta: true,
-  async refactorSqlQuery({ conid, database, query, task, dialect }) {
-    const existing = this.opened.find(x => x.conid == conid && x.database == database);
-    const { structure } = existing || {};
-    if (!structure) return { errorMessage: 'No database structure' };
-    const res = await callRefactorSqlQueryApi(query, task, structure, dialect);
-
-    if (!res?.sql) {
-      return { errorMessage: 'No SQL generated' };
-    }
-
-    return res;
-  },
-
   async getNativeOpCommandArgs(
     command,
     { conid, database, outputFile, inputFile, options, selectedTables, skippedTables, argsFormat }
@@ -1104,10 +1046,7 @@ module.exports = {
 
   async getNativeOpContext(conid) {
     const sourceConnection = await connections.getCore({ conid });
-    // Connections stored in a cloud folder are encrypted with the folder key, not the local one.
-    const connection = sourceConnection?._id?.startsWith('cloud://')
-      ? { ...(await decryptCloudConnection(sourceConnection)) }
-      : { ...decryptConnection(sourceConnection) };
+    const connection = { ...decryptConnection(sourceConnection) };
     const driver = requireEngineDriver(connection);
 
     if (!connection.port && driver.defaultPort) {

@@ -1,9 +1,7 @@
 <script lang="ts">
   import type { ThemeDefinition } from 'dbgate-types';
   import FontIcon from '../icons/FontIcon.svelte';
-  import { currentThemeDefinition, currentThemeType, getCompleteThemeVariables } from '../plugins/themes';
-  import { apiCall } from '../utility/api';
-  import { trackUsage } from '../utility/usageAnalytics';
+  import { currentThemeDefinition, getCompleteThemeVariables } from '../plugins/themes';
 
   export let theme: ThemeDefinition;
 
@@ -12,13 +10,7 @@
     .join(';');
 
   async function handleApplyTheme() {
-    if (theme.themePublicCloudPath) {
-      trackUsage({ feature: 'knowledge_base', action: 'use_theme', param: theme.themePublicCloudPath });
-      const fileData = await apiCall('cloud/public-file-data', { path: theme.themePublicCloudPath });
-      const themeJson = JSON.parse(fileData.text);
-      $currentThemeDefinition = themeJson;
-      return;
-    }
+
     $currentThemeDefinition = theme;
   }
 </script>
@@ -27,7 +19,7 @@
   style={cssVarColors}
   class="container"
   on:click={handleApplyTheme}
-  data-testid={`ThemeSkeleton-${theme.themeName}-${theme.isBuiltInTheme ? 'built-in' : theme.themePublicCloudPath ? 'cloud' : 'file'}`}
+  data-testid={`ThemeSkeleton-${theme.themeName}-${theme.isBuiltInTheme ? 'built-in' : 'file'}`}
 >
   <div class="iconbar">
     <div class="icon selected-icon">
@@ -43,7 +35,7 @@
 
   <div class="content">
     {theme.themeName}<br />
-    {theme.isBuiltInTheme ? '(built-in)' : theme.themePublicCloudPath ? '(cloud)' : '(file)'}
+    {theme.isBuiltInTheme ? '(built-in)' : '(file)'}
   </div>
 </div>
 

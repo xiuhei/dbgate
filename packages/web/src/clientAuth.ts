@@ -2,8 +2,6 @@ import { apiCall, enableApi, getAuthCategory } from './utility/api';
 import { getConfig } from './utility/metadataLoaders';
 import { isAdminPage } from './utility/pageDefs';
 import getElectron from './utility/getElectron';
-import { isProApp } from './utility/proTools';
-import { cloudSigninTokenHolder, selectedWidget } from './stores';
 
 export function isOauthCallback() {
   const params = new URLSearchParams(location.search);
@@ -115,12 +113,6 @@ export function handleOauthCallback() {
     return true;
   }
 
-  const cloudSid = params.get('dbgate-cloud-sid');
-  if (cloudSid) {
-    sessionStorage.setItem('dbgate-cloud-sid', cloudSid);
-    internalRedirectTo(`/`);
-  }
-
   return false;
 }
 
@@ -130,39 +122,6 @@ export async function handleAuthOnStartup(config) {
   function checkConfigError() {
     if (config.configurationError) {
       internalRedirectTo(`/error.html`);
-      return true;
-    }
-  }
-
-  function checkInvalidLicense() {
-    if (!isProApp()) {
-      return;
-    }
-    if (!config.isLicenseValid) {
-      if (config.storageDatabase || getElectron()) {
-        if (isAdminPage()) {
-          internalRedirectTo(`/admin-license.html`);
-        } else {
-          internalRedirectTo(`/license.html`);
-        }
-      } else {
-        internalRedirectTo(`/error.html`);
-      }
-      return true;
-    }
-  }
-
-  function checkTrialDaysLeft() {
-    if (!isProApp()) {
-      return;
-    }
-    if (
-      config.trialDaysLeft != null &&
-      config.trialDaysLeft <= 14 &&
-      !sessionStorage.getItem('continueTrialConfirmed') &&
-      getElectron()
-    ) {
-      internalRedirectTo(`/license.html`);
       return true;
     }
   }
@@ -194,18 +153,6 @@ export async function handleAuthOnStartup(config) {
     }
   }
 
-  async function checkDbGateCloudLogin() {
-    const sid = sessionStorage.getItem('dbgate-cloud-sid');
-    if (sid) {
-      const tokenHolder = await apiCall('auth/cloud-login-redirected', { sid });
-      if (tokenHolder) {
-        sessionStorage.removeItem('dbgate-cloud-sid');
-        cloudSigninTokenHolder.set(tokenHolder);
-        selectedWidget.set('cloud-private');
-      }
-    }
-  }
-
   if (page == 'error') return;
   if (checkConfigError()) return;
 
@@ -222,52 +169,6 @@ export async function handleAuthOnStartup(config) {
     return;
   if (checkLoggedUser()) return;
 
-  if (page == 'license' || page == 'admin-license') return;
-  if (checkTrialDaysLeft()) return;
-  if (checkInvalidLicense()) return;
-  checkDbGateCloudLogin();
-
-  // if (config.configurationError) {
-  //   internalRedirectTo(`/error.html`);
-  //   return;
-  // }
-
-  // if (!config.isLicenseValid) {
-  //   if (config.storageDatabase || getElectron()) {
-  //     internalRedirectTo(`/license.html`);
-  //   } else {
-  //     internalRedirectTo(`/error.html`);
-  //   }
-  // }
-
-  // if (
-  //   config.trialDaysLeft != null &&
-  //   config.trialDaysLeft <= 14 &&
-  //   !sessionStorage.getItem('continueTrialConfirmed') &&
-  //   getElectron()
-  // ) {
-  //   internalRedirectTo(`/license.html`);
-  // }
-
-  // if (getAuthCategory(config) == 'admin') {
-  //   if (localStorage.getItem('adminAccessToken')) {
-  //     return;
-  //   }
-
-  //   redirectToAdminLogin();
-  //   return;
-  // }
-
-  // // if (config.oauth) {
-  // //   console.log('OAUTH callback URL:', location.origin + location.pathname);
-  // // }
-  // if (getAuthCategory(config) == 'token') {
-  //   if (localStorage.getItem('accessToken')) {
-  //     return;
-  //   }
-
-  //   redirectToLogin(config);
-  // }
 }
 
 export async function redirectToAdminLogin() {
@@ -324,11 +225,9 @@ export async function doLogout() {
   const category = getAuthCategory(config);
 
   if (category == 'admin') {
-    await apiCall('auth/logout-admin');
     localStorage.removeItem('adminAccessToken');
     internalRedirectTo('/admin-login.html?is-admin=true');
   } else if (category == 'token') {
-    await apiCall('auth/logout-user');
     localStorage.removeItem('accessToken');
     if (config.logoutUrl) {
       window.location.href = config.logoutUrl;

@@ -9,7 +9,7 @@
   import { editorAddConstraint, editorDeleteConstraint, editorModifyConstraint } from 'dbgate-tools';
   import TextField from '../forms/TextField.svelte';
   import SelectField from '../forms/SelectField.svelte';
-  import { _t, __t } from '../translations';
+  import { _t } from '../translations';
   import _ from 'lodash';
 
   export let constraintInfo;

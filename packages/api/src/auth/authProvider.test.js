@@ -17,49 +17,18 @@ jest.mock('dbgate-tools', () => ({
 jest.mock('activedirectory2', () => ({ promiseWrapper: class {} }));
 jest.mock('axios', () => ({ default: { post: jest.fn(), get: jest.fn() } }));
 jest.mock('google-auth-library', () => ({ GoogleAuth: class {}, OAuth2Client: class {}, JWT: class {} }));
-jest.mock('../controllers/storageDb', () => ({
-  storageSelectFmt: jest.fn(async () => []),
-  storageReadUserRolePermissions: jest.fn(async () => []),
-  storageReadUserPermissions: jest.fn(async () => []),
-  storageReadRolePermissions: jest.fn(async () => []),
-  storageSqlCommandFmt: jest.fn(),
-  loadSuperadminPermissions: jest.fn(async () => []),
-  readComplexUserRolePermissions: jest.fn(async () => []),
-  readComplexRolePermissions: jest.fn(async () => []),
-  resolvePermissionConnectionIds: jest.fn(async () => []),
-  storageCheckRoleConnectionAccess: jest.fn(async () => true),
-  storageCheckUserRoleConnectionAccess: jest.fn(async () => true),
-  storageSyncUserAuthRoles: jest.fn(),
-}));
+
 jest.mock('../utility/authProxy', () => ({ authProxyGetTokenFromCode: jest.fn(), authProxyGetRedirectUrl: jest.fn() }));
 jest.mock('../utility/crypting', () => ({ decryptUser: jest.fn(x => x), decryptPasswordString: jest.fn(x => x) }));
 jest.mock('../utility/auditlog', () => ({ sendToAuditLog: jest.fn() }));
-jest.mock('../utility/loginchecker', () => ({
-  isLoginLicensed: jest.fn(async () => true),
-  LOGIN_LIMIT_ERROR: 'login limit',
-  markTokenAsLoggedIn: jest.fn(),
-  markUserAsActive: jest.fn(),
-  markLoginAsLoggedOut: jest.fn(),
-}));
+
 jest.mock('./authConfigTools', () => ({ isEnabledConfigValue: jest.fn(() => true) }));
 jest.mock('../controllers/storage', () => ({ readConfig: jest.fn(async () => ({})) }));
-jest.mock('../utility/cloudIntf', () => ({
-  createDbGateIdentitySession: jest.fn(),
-  startCloudTokenChecking: jest.fn(),
-  readCloudTokenHolder: jest.fn(),
-  readCloudTestTokenHolder: jest.fn(),
-}));
+
 jest.mock('../utility/socket', () => ({
   ...jest.requireActual('../utility/socket'),
   emit: jest.fn(),
   emitChanged: jest.fn(),
-}));
-jest.mock('../utility/mcpAuth', () => ({
-  readMcpConfig: jest.fn(),
-  getPublicBaseUrl: jest.fn(),
-  getMcpResourceUrl: jest.fn(),
-  setMcpIdentity: jest.fn(),
-  safeTokenHashEquals: jest.fn(),
 }));
 
 const jwt = require('jsonwebtoken');
@@ -149,39 +118,16 @@ describe('env auth providers', () => {
   });
 });
 
-describe('storage auth providers', () => {
-  const { createStorageAuthProvider, SuperadminAuthProvider } = require('./storageAuthProvider');
-
-  test('the superadmin provider does not issue a token from login()', async () => {
-    const resp = await new SuperadminAuthProvider().login(undefined, undefined, undefined, {});
-    expect(resp.accessToken).toBeUndefined();
-  });
-
-  test.each(['oauth', 'google', 'msentra', 'unknown-type'])(
-    'the %s storage provider does not issue a token from login()',
-    async type => {
-      const provider = createStorageAuthProvider({ amoid: `${type}-1`, type, name: type });
-      const resp = await provider.login(undefined, undefined, undefined, {});
-      expect(resp.accessToken).toBeUndefined();
-    }
-  );
-
-  test('the anonymous storage provider still logs everybody in', async () => {
-    const provider = createStorageAuthProvider({ amoid: 'anonymous-1', type: 'none', name: 'Anonymous' });
-    const resp = await provider.login(undefined, undefined, undefined, {});
-    expect(resp.accessToken).toBeTruthy();
-  });
-});
-
 describe('auth/login', () => {
-  const { setAuthProviders, AnonymousAuthProvider } = require('./authProvider');
-  const { createStorageAuthProvider, SuperadminAuthProvider } = require('./storageAuthProvider');
+  const { setAuthProviders, AnonymousAuthProvider, AuthProviderBase } = require('./authProvider');
   const authController = require('../controllers/auth');
 
   beforeEach(() => {
-    const local = createStorageAuthProvider({ amoid: 'local-1', type: 'local', name: 'Local' });
-    const oauth = createStorageAuthProvider({ amoid: 'oauth-1', type: 'oauth', name: 'OAuth' });
-    setAuthProviders([local, oauth, new SuperadminAuthProvider()], local);
+    const oauth = new AuthProviderBase();
+    oauth.amoid = 'oauth-1';
+    const superadmin = new AuthProviderBase();
+    superadmin.amoid = 'superadmin';
+    setAuthProviders([oauth, superadmin], oauth);
   });
 
   test('a superadmin token cannot be obtained by naming the superadmin provider', async () => {
@@ -245,37 +191,5 @@ describe('authMiddleware with BASIC_AUTH', () => {
     const { res, next } = await callProtectedRoute();
     expect(next).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(401);
-  });
-});
-
-// The cloud login token used to be written to every connected event stream - and /stream is not
-// authenticated
-describe('auth/create-cloud-login-session', () => {
-  const socket = require('../utility/socket');
-  const { createDbGateIdentitySession, startCloudTokenChecking } = require('../utility/cloudIntf');
-  const authController = require('../controllers/auth');
-  const tokenHolder = { email: 'alice@example.com', token: 'cloud-token' };
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    createDbGateIdentitySession.mockResolvedValue({ sid: 'sid1', url: 'https://identity.example/login' });
-    startCloudTokenChecking.mockImplementation((sid, callback) => callback(tokenHolder));
-  });
-
-  test('the token goes only to the stream of the tab that started the login', async () => {
-    await authController.createCloudLoginSession({ client: 'web' }, { headers: { 'x-dbgate-strmid': 'tab-a' } });
-    expect(socket.emit).toHaveBeenCalledWith('got-cloud-token', { ...tokenHolder, strmid: 'tab-a' });
-  });
-
-  test('without the stream id of a tab, no stream receives it', async () => {
-    await authController.createCloudLoginSession({ client: 'web' }, { headers: {} });
-    const call = socket.emit.mock.calls.find(([message]) => message == 'got-cloud-token');
-    expect(call[1].strmid).toBeTruthy();
-    expect(call[1].strmid).not.toBe('tab-a');
-  });
-
-  test('the desktop app, which calls without a request, still receives it', async () => {
-    await authController.createCloudLoginSession({ client: 'app' });
-    expect(socket.emit).toHaveBeenCalledWith('got-cloud-token', tokenHolder);
   });
 });

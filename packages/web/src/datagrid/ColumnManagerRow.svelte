@@ -1,5 +1,4 @@
 <script lang="ts">
-  import { plusExpandIcon } from '../icons/expandIcons';
 
   import FontIcon from '../icons/FontIcon.svelte';
   import ColumnLabel from '../elements/ColumnLabel.svelte';
@@ -7,7 +6,6 @@
   import { showModal } from '../modals/modalTools';
   import ColumnEditorModal from '../tableeditor/ColumnEditorModal.svelte';
   import { editorDeleteColumn } from 'dbgate-tools';
-  import { isProApp } from '../utility/proTools';
 
   export let column;
   export let display;
@@ -60,17 +58,7 @@
   on:mouseup
 >
   <div>
-    {#if isProApp()}
-      <span class="expandColumnIcon" style={`margin-right: ${5 + (column.uniquePath.length - 1) * 10}px`}>
-        <FontIcon
-          icon={column.isExpandable
-            ? plusExpandIcon(display.isExpandedColumn(column.uniqueName))
-            : 'icon invisible-box'}
-          on:click={() => display.toggleExpandedColumn(column.uniqueName)}
-          data-testid="ColumnManagerRow_expand_{column.uniqueName}"
-        />
-      </span>
-    {/if}
+
     {#if isJsonView}
       <FontIcon icon="img column" />
     {:else}

@@ -2,23 +2,12 @@
   import { getActiveComponent } from '../utility/createActivator';
   import registerCommand from '../commands/registerCommand';
   import { __t } from '../translations';
-  import { getCommandSource } from '../commands/commandSource';
-  import { getUsageTab } from '../utility/usageAnalytics';
 
-  /** The designer canvas is shared, the event belongs to the tab which hosts it. */
-  function getDesignerUsageFeature(): string {
-    const tab = getUsageTab();
-    if (tab == 'diagram') return 'diagram';
-    if (tab == 'perspective') return 'perspective_designer';
-    return 'query_designer';
-  }
   const getCurrentEditor = () => getActiveComponent('Designer');
 
   registerCommand({
     id: 'designer.arrange',
-    // Auto arrange runs the same command programmatically; only explicit invocations are tracked.
-    usageAnalytics: () =>
-      getCommandSource() == 'command' ? undefined : { feature: getDesignerUsageFeature(), action: 'arrange' },
+
     category: __t('command.designer', { defaultMessage: 'Designer' }),
     icon: 'icon arrange',
     name: __t('command.designer.arrange', { defaultMessage: 'Arrange' }),
@@ -91,7 +80,7 @@
   import CloseSearchButton from '../buttons/CloseSearchButton.svelte';
   import DragColumnMemory from './DragColumnMemory.svelte';
   import createRef from '../utility/createRef';
-  import { isProApp } from '../utility/proTools';
+
   import dragScroll from '../utility/dragScroll';
   import FormStyledButton from '../buttons/FormStyledButton.svelte';
   import { _t } from '../translations';
@@ -902,53 +891,7 @@
       menu,
       settings?.customizeStyle && [
         { divider: true },
-        isProApp() && {
-          text: _t('designer.columnProperties', { defaultMessage: 'Column properties' }),
-          submenu: [
-            {
-              text: _t('designer.nullabilityYesNo', {
-                defaultMessage: 'Nullability: {show}',
-                values: { show: value?.style?.showNullability ? 'YES' : 'NO' },
-              }),
-              onClick: changeStyleFunc('showNullability', !value?.style?.showNullability),
-            },
-            {
-              text: _t('designer.dataTypeYesNo', {
-                defaultMessage: 'Data type: {show}',
-                values: { show: value?.style?.showDataType ? 'YES' : 'NO' },
-              }),
-              onClick: changeStyleFunc('showDataType', !value?.style?.showDataType),
-            },
-          ],
-        },
-        isProApp() && {
-          text: _t('designer.columns', {
-            defaultMessage: 'Columns - { filterColumns }',
-            values: { filterColumns: _.startCase(value?.style?.filterColumns || 'all') },
-          }),
-          submenu: [
-            {
-              text: _t('designer.all', { defaultMessage: 'All' }),
-              onClick: changeStyleFunc('filterColumns', ''),
-            },
-            {
-              text: _t('designer.primaryKey', { defaultMessage: 'Primary Key' }),
-              onClick: changeStyleFunc('filterColumns', 'primaryKey'),
-            },
-            {
-              text: _t('designer.allKeys', { defaultMessage: 'All Keys' }),
-              onClick: changeStyleFunc('filterColumns', 'allKeys'),
-            },
-            {
-              text: _t('designer.notNull', { defaultMessage: 'Not Null' }),
-              onClick: changeStyleFunc('filterColumns', 'notNull'),
-            },
-            {
-              text: _t('designer.keysAndNotNull', { defaultMessage: 'Keys And Not Null' }),
-              onClick: changeStyleFunc('filterColumns', 'keysAndNotNull'),
-            },
-          ],
-        },
+
         {
           text: _t('designer.zoom', {
             defaultMessage: 'Zoom - {zoom}%',

@@ -3,7 +3,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import FormButton from '../forms/FormButton.svelte';
   import FontIcon from '../icons/FontIcon.svelte';
   import TabControl from '../elements/TabControl.svelte';
@@ -18,13 +18,7 @@
   import ErrorMessageModal from '../modals/ErrorMessageModal.svelte';
   import { writable } from 'svelte/store';
   import FormProviderCore from '../forms/FormProviderCore.svelte';
-  import {
-    extensions,
-    getCurrentConfig,
-    openedConnections,
-    openedSingleDatabaseConnections,
-    openedTabs,
-  } from '../stores';
+  import { extensions, getCurrentConfig, openedConnections, openedSingleDatabaseConnections } from '../stores';
   import _, { Dictionary } from 'lodash';
   import { apiCall, apiOn, apiOff } from '../utility/api';
   import { showSnackbarError, showSnackbarSuccess } from '../utility/snackbar';
@@ -37,7 +31,6 @@
   import ConnectionAdvancedDriverFields from '../settings/ConnectionAdvancedDriverFields.svelte';
   import DatabaseLoginModal from '../modals/DatabaseLoginModal.svelte';
   import { _t } from '../translations';
-  import ChooseCloudFolderModal from '../modals/ChooseCloudFolderModal.svelte';
 
   export let connection;
   export let tabid;
@@ -46,7 +39,6 @@
   export let inlineTabs = false;
 
   export let onlyTestButton;
-  export let saveOnCloud = false;
 
   let isTesting;
   let sqlConnectResult;
@@ -93,19 +85,8 @@
     });
   }
 
-  /** Where the connection is stored: cloud or local. */
-  function getConnectionStorageParam() {
-    return saveOnCloud || `${$values?._id ?? ''}`.startsWith('cloud://') ? 'cloud' : 'local';
-  }
-
   async function handleTestCore(connection, requestDbList = false) {
-    trackUsage({
-      feature: 'connection',
-      action: 'test',
-      tab: 'connection',
-      engine: connection.engine,
-      param: getConnectionStorageParam(),
-    });
+
     isTesting = true;
     testIdRef.update(x => x + 1);
     const testid = testIdRef.get();
@@ -202,52 +183,8 @@
   $: currentConnection = getCurrentConnectionCore($values, driver);
 
   async function handleSave() {
-    trackUsage({
-      feature: 'connection',
-      action: 'save',
-      tab: 'connection',
-      engine: driver?.engine,
-      param: getConnectionStorageParam(),
-    });
-    if (saveOnCloud && !getCurrentConnection()?._id) {
-      showModal(ChooseCloudFolderModal, {
-        requiredRoleVariants: ['write', 'admin'],
-        message: 'Choose cloud folder to saved connection',
-        onConfirm: async folid => {
-          let connection = getCurrentConnection();
-          const saved = await apiCall('cloud/save-connection', { folid, connection });
-          if (saved?._id) {
-            $values = {
-              ...$values,
-              _id: saved._id,
-              unsaved: false,
-            };
-            changeTab(tabid, tab => ({
-              ...tab,
-              title: getConnectionLabel(saved),
-              props: {
-                ...tab.props,
-                conid: saved._id,
-              },
-            }));
-            showSnackbarSuccess('Connection saved');
-          }
-        },
-      });
-    } else if (
-      // @ts-ignore
-      getCurrentConnection()?._id?.startsWith('cloud://')
-    ) {
-      let connection = getCurrentConnection();
-      const resp = await apiCall('cloud/save-connection', { connection });
-      if (resp?._id) {
-        showSnackbarSuccess('Connection saved');
-        changeTab(tabid, tab => ({
-          ...tab,
-          title: getConnectionLabel(connection),
-        }));
-      }
-    } else {
+
+    {
       let connection = getCurrentConnection();
       connection = {
         ...connection,
@@ -272,26 +209,9 @@
   }
 
   async function handleConnect() {
-    trackUsage({
-      feature: 'connection',
-      action: 'connect',
-      tab: 'connection',
-      engine: driver?.engine,
-      param: getConnectionStorageParam(),
-    });
+
     let connection = getCurrentConnection();
 
-    if (
-      // @ts-ignore
-      connection?._id?.startsWith('cloud://')
-    ) {
-      const saved = await apiCall('cloud/save-connection', { connection });
-      changeTab(tabid, tab => ({
-        ...tab,
-        title: getConnectionLabel(connection),
-      }));
-      openConnection(saved);
-    } else {
       if (!connection._id) {
         connection = {
           ...connection,
@@ -305,18 +225,11 @@
         _id: saved._id,
       };
       openConnection(saved);
-    }
     // closeMultipleTabs(x => x.tabid == tabid, true);
   }
 
   async function handleDisconnect() {
-    trackUsage({
-      feature: 'connection',
-      action: 'disconnect',
-      tab: 'connection',
-      engine: driver?.engine,
-      param: getConnectionStorageParam(),
-    });
+
     if ($values.singleDatabase) {
       disconnectDatabaseConnection($values._id, $values.defaultDatabase);
     } else {
@@ -409,9 +322,9 @@
           {:else if isConnected}
             <FormButton value="Disconnect" on:click={handleDisconnect} data-testid="ConnectionTab_buttonDisconnect" />
           {:else}
-            {#if $values._id || !saveOnCloud}
+
               <FormButton value="Connect" on:click={handleConnect} data-testid="ConnectionTab_buttonConnect" />
-            {/if}
+
             {#if isTesting}
               <FormButton value="Cancel test" on:click={handleCancelTest} />
             {:else}

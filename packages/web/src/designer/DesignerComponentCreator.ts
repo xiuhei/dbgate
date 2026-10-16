@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import type { DesignerInfo, DesignerTableInfo, DesignerReferenceInfo, DesignerJoinType } from './types';
+import type { DesignerInfo, DesignerTableInfo, DesignerReferenceInfo } from './types';
 import { findPrimaryTable, findConnectingReference, referenceIsJoin, referenceIsExists } from './designerTools';
 
 export class DesignerComponent {

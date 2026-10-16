@@ -1,7 +1,5 @@
 const { extractErrorLogData } = require('./stringTools');
 
-// An axios error is logged as an object holding the request it failed on, headers included, so
-// the Authorization header of e.g. a license or cloud call ended up in the logs.
 test('the request headers of an HTTP client error are not logged', () => {
   const err = Object.assign(new Error('Request failed with status code 401'), {
     isAxiosError: true,

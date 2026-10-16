@@ -450,7 +450,7 @@ const postgresDriver = {
   supportsNodejsRestore: true,
   nodejsBackupTool: 'dbgate-pg-dumper',
   nodejsRestoreTool: 'dbgate-pg-dumper',
-  supportsServerSqlChat: true,
+
   engine: 'postgres@dbgate-plugin-postgres',
   title: 'PostgreSQL',
   defaultPort: 5432,
@@ -507,7 +507,7 @@ const redshiftDriver = {
   engine: 'redshift@dbgate-plugin-postgres',
   title: 'Amazon Redshift',
   defaultPort: 5439,
-  premiumOnly: true,
+
   databaseUrlPlaceholder: 'e.g. redshift-cluster-1.xxxx.redshift.amazonaws.com:5439/dev',
   icon: redshiftIcon,
   showConnectionField: (field, values) =>

@@ -5,13 +5,13 @@
   import { apiCall, apiOff, apiOn } from '../utility/api';
 
   import { getActiveComponent } from '../utility/createActivator';
-  import { useConnectionInfo, useDatabaseInfo, useFiles, useSettings } from '../utility/metadataLoaders';
+  import { useConnectionInfo, useFiles, useSettings } from '../utility/metadataLoaders';
 
   const getCurrentEditor = () => getActiveComponent('RestoreDatabaseTab');
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import FontIcon from '../icons/FontIcon.svelte';
   import getElectron from '../utility/getElectron';
   import WidgetColumnBar from '../widgets/WidgetColumnBar.svelte';
@@ -30,7 +30,7 @@
   import LoadingInfo from '../elements/LoadingInfo.svelte';
   import FormStyledButton from '../buttons/FormStyledButton.svelte';
   import { extensions } from '../stores';
-  import { isProApp } from '../utility/proTools';
+
   import { onDestroy } from 'svelte';
   import RunnerOutputFiles from '../query/RunnerOutputFiles.svelte';
 
@@ -62,7 +62,6 @@
   const sqlFiles = useFiles({ folder: 'sql' });
 
   const electron = getElectron();
-  const isPremium = isProApp();
 
   $: driver = findEngineDriver($connection, $extensions);
   $: formArgs = (driver?.getNativeOperationFormArgs ? driver.getNativeOperationFormArgs('restore') : null) ?? [];
@@ -128,13 +127,7 @@
   }
 
   async function handleExecute() {
-    trackUsage({
-      feature: 'restore_database',
-      action: 'execute',
-      tab: 'restore_database',
-      engine: driver?.engine,
-      param: restoreTool || 'native',
-    });
+
     busy = true;
     operationStatus = 'Running';
 
@@ -158,24 +151,12 @@
   }
 
   async function handleCancel() {
-    trackUsage({
-      feature: 'restore_database',
-      action: 'cancel',
-      tab: 'restore_database',
-      engine: driver?.engine,
-      param: restoreTool || 'native',
-    });
+
     await apiCall('runners/cancel', { runid: runnerId });
   }
 
   async function handleGenerateCommand() {
-    trackUsage({
-      feature: 'restore_database',
-      action: 'generate_command',
-      tab: 'restore_database',
-      engine: driver?.engine,
-      param: restoreTool || 'native',
-    });
+
     try {
       const resp = await apiCall('database-connections/native-restore-command', await getRestoreParams());
       copyTextToClipboard(resp.commandLine);
@@ -303,7 +284,7 @@
 </script>
 
 <ToolStripContainer>
-  <VerticalSplitter initialValue={isPremium ? '320px' : '200px'}>
+  <VerticalSplitter initialValue="320px">
     <svelte:fragment slot="1">
       <div class="content">
         <div class="source">
@@ -394,7 +375,7 @@
           </div>
           <div data-testid="RestoreDatabaseTab_status">{operationStatus}</div>
         </div>
-        {#if restoreToolArg && isPremium}
+        {#if restoreToolArg && true}
           <div class="options">
             <div class="option-label">Restore tool</div>
             <SelectField
@@ -453,7 +434,7 @@
         >Run</ToolStripButton
       >
     {/if}
-    {#if isPremium && restoreTool != driver?.nodejsRestoreTool}
+    {#if restoreTool != driver?.nodejsRestoreTool}
       <ToolStripButton
         icon="img shell"
         on:click={handleGenerateCommand}

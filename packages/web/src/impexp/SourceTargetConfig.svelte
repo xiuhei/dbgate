@@ -26,7 +26,7 @@
   import { showModal } from '../modals/modalTools';
   import InputTextModal from '../modals/InputTextModal.svelte';
   import FormCheckboxField from '../forms/FormCheckboxField.svelte';
-  import { isProApp } from '../utility/proTools';
+
   import FormTextField from '../forms/FormTextField.svelte';
 
   export let direction;
@@ -136,42 +136,6 @@
     label={_t('importExport.storageType', { defaultMessage: "Storage type" })}
     isNative={true}
   />
-
-  {#if format && isProApp()}
-    {#if direction == 'source'}
-      <FormCheckboxField
-        name={`importFromZipFile`}
-        label={_t('importExport.importFromZipFile', { defaultMessage: 'Import from ZIP file (in archive folder)' })}
-      />
-      {#if $values.importFromZipFile}
-        <FormArchiveFolderSelect
-          label={_t('importExport.importFromZipArchive', { defaultMessage: 'Input ZIP archive' })}
-          name={archiveFolderField}
-          additionalFolders={_.compact([$values[archiveFolderField]])}
-          zipFilesOnly
-          isNative={true}
-        />
-      {/if}
-    {/if}
-    {#if direction == 'target'}
-      <FormCheckboxField
-        name={`exportToZipFile`}
-        label={_t('importExport.exportToZipFile', { defaultMessage: 'Export to ZIP file' })}
-      />
-      {#if $values.exportToZipFile}
-        <FormCheckboxField
-          name={`createZipFileInArchive`}
-          label={_t('importExport.createZipFileInArchive', { defaultMessage: 'Create ZIP file in archive' })}
-        />
-
-        <FormTextField
-          label={_t('importExport.exportToZipArchive', { defaultMessage: 'Output ZIP archive' })}
-          name={archiveFolderField}
-          placeholder={'zip-archive-yyyy-mm-dd-hh-mm-ss.zip'}
-        />
-      {/if}
-    {/if}
-  {/if}
 
   {#if storageType == 'database' || storageType == 'query'}
     <FormConnectionSelect name={connectionIdField} label={_t('common.server', { defaultMessage: 'Server' })} {direction}  isNative={true} />

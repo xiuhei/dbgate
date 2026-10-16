@@ -4,7 +4,6 @@
   import AppObjectList from '../appobj/AppObjectList.svelte';
   import * as closedTabAppObject from '../appobj/ClosedTabAppObject.svelte';
   import * as favoriteFileAppObject from '../appobj/FavoriteFileAppObject.svelte';
-  import { openedTabs } from '../stores';
 
   import hasPermission from '../utility/hasPermission';
   import { useFavorites } from '../utility/metadataLoaders';

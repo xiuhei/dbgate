@@ -8,7 +8,7 @@ import { handleOauthCallback } from './clientAuth';
 import LoginPage from './LoginPage.svelte';
 import NotLoggedPage from './NotLoggedPage.svelte';
 import ErrorPage from './ErrorPage.svelte';
-import EnterLicensePage from './EnterLicensePage.svelte';
+
 import SetAdminPasswordPage from './SetAdminPasswordPage.svelte';
 import RedirectPage from './RedirectPage.svelte';
 import ForgotPasswordPage from './ForgotPasswordPage.svelte';
@@ -33,12 +33,6 @@ function createApp() {
       });
     case 'error':
       return new ErrorPage({
-        target: document.body,
-        props: {},
-      });
-    case 'license':
-    case 'admin-license':
-      return new EnterLicensePage({
         target: document.body,
         props: {},
       });

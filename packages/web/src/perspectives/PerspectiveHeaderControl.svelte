@@ -1,7 +1,7 @@
 <script lang="ts">
   import { PerspectiveDisplayColumn } from 'dbgate-datalib';
   import type { ChangePerspectiveConfigFunc, PerspectiveConfig } from 'dbgate-datalib';
-  import _, { mapKeys } from 'lodash';
+  import _, {  } from 'lodash';
 
   import DropDownButton from '../buttons/DropDownButton.svelte';
   import FontIcon from '../icons/FontIcon.svelte';

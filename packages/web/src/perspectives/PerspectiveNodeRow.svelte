@@ -5,7 +5,7 @@
   import ColumnLabel from '../elements/ColumnLabel.svelte';
   import { plusExpandIcon } from '../icons/expandIcons';
   import FontIcon from '../icons/FontIcon.svelte';
-  import { showModal } from '../modals/modalTools';
+
   import contextMenu from '../utility/contextMenu';
   import CustomJoinModal from './CustomJoinModal.svelte';
   import { getPerspectiveNodeMenu } from './perspectiveMenu';

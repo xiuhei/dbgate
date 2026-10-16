@@ -3,9 +3,9 @@
   import { createEventDispatcher, tick } from 'svelte';
 
   import SelectField from '../forms/SelectField.svelte';
-  import { currentDatabase } from '../stores';
+
   import { filterAppsForDatabase } from '../utility/appTools';
-  import { getConnectionInfo, useAllApps, useConnectionInfo, useDatabaseInfo } from '../utility/metadataLoaders';
+  import { useAllApps, useConnectionInfo, useDatabaseInfo } from '../utility/metadataLoaders';
   import InlineButton from '../buttons/InlineButton.svelte';
   import FontIcon from '../icons/FontIcon.svelte';
   import { showModal } from '../modals/modalTools';

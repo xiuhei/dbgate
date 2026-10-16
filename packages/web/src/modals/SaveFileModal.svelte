@@ -4,15 +4,15 @@
   import FormProviderCore from '../forms/FormProviderCore.svelte';
   import FormSubmit from '../forms/FormSubmit.svelte';
   import FormTextField from '../forms/FormTextField.svelte';
-  import { cloudSigninTokenHolder, getCurrentConfig } from '../stores';
+  import { getCurrentConfig } from '../stores';
   import { _t } from '../translations';
   import { apiCall } from '../utility/api';
   import { writable } from 'svelte/store';
 
   import getElectron from '../utility/getElectron';
   import ModalBase from './ModalBase.svelte';
-  import { closeCurrentModal, showModal } from './modalTools';
-  import FormCloudFolderSelect from '../forms/FormCloudFolderSelect.svelte';
+  import { closeCurrentModal } from './modalTools';
+
   import FormCheckboxField from '../forms/FormCheckboxField.svelte';
   import { useConfig, useTeamFolders } from '../utility/metadataLoaders';
   import { showSnackbarError } from '../utility/snackbar';
@@ -25,8 +25,7 @@
   export let fileExtension;
   export let filePath;
   export let onSave = undefined;
-  export let folid;
-  export let skipLocal = false;
+
   export let defaultTeamFolder = false;
   // export let cntid;
 
@@ -40,7 +39,7 @@
 
   const values = writable({
     name,
-    cloudFolder: folid ?? '__local',
+
     saveToTeamFolder: !!(getCurrentConfig()?.storageDatabase && defaultTeamFolder),
     teamFolderId: '-1',
   });
@@ -59,7 +58,7 @@
   }
 
   const handleSubmit = async e => {
-    const { name, cloudFolder, teamFolderId, saveToTeamFolder } = e.detail;
+    const { name, teamFolderId, saveToTeamFolder } = e.detail;
     if (saveToTeamFolder && enabledTeamFolders) {
       const selectedTeamFolderId = writableTeamFolderIds.includes(teamFolderId?.toString())
         ? teamFolderId
@@ -79,15 +78,14 @@
             savedFile: name,
             savedFolder: folder,
             savedFilePath: null,
-            savedCloudFolderId: null,
-            savedCloudContentId: null,
+
             savedTeamFileId: resp.teamFileId,
           });
         }
       } else {
         showSnackbarError('Failed to save to team folder.');
       }
-    } else if (cloudFolder === '__local') {
+    } else {
       await apiCall('files/save', { folder, file: name, data, format });
       closeCurrentModal();
       if (onSave) {
@@ -95,32 +93,9 @@
           savedFile: name,
           savedFolder: folder,
           savedFilePath: null,
-          savedCloudFolderId: null,
-          savedCloudContentId: null,
+
           savedTeamFileId: null,
         });
-      }
-    } else {
-      const resp = await apiCall('cloud/save-file', {
-        folid: cloudFolder,
-        fileName: name,
-        data,
-        contentFolder: folder,
-        format,
-        // cntid,
-      });
-      if (resp.cntid) {
-        closeCurrentModal();
-        if (onSave) {
-          onSave(name, {
-            savedFile: name,
-            savedFolder: folder,
-            savedFilePath: null,
-            savedCloudFolderId: cloudFolder,
-            savedCloudContentId: resp.cntid,
-            savedTeamFileId: null,
-          });
-        }
       }
     }
   };
@@ -138,8 +113,7 @@
         savedFile: null,
         savedFolder: null,
         savedFilePath: filePath,
-        savedCloudFolderId: null,
-        savedCloudContentId: null,
+
         savedTeamFileId: null,
       });
     }
@@ -150,32 +124,17 @@
   <ModalBase {...$$restProps}>
     <svelte:fragment slot="header">Save file</svelte:fragment>
     <FormTextField label="File name" name="name" focused />
-    {#if $cloudSigninTokenHolder && !($values['saveToTeamFolder'] && enabledTeamFolders)}
-      <FormCloudFolderSelect
-        label={_t('cloud.chooseCloudFolder', { defaultMessage: 'Choose cloud folder' })}
-        name="cloudFolder"
-        isNative
-        requiredRoleVariants={['write', 'admin']}
-        prependFolders={skipLocal
-          ? []
-          : [
-              {
-                folid: '__local',
-                name: _t('cloud.localFolder', { defaultMessage: "Local folder (don't store on cloud)" }),
-              },
-            ]}
-      />
-    {/if}
+
     {#if $configValue?.storageDatabase && enabledTeamFolders}
       <FormCheckboxField
-        label={_t('cloud.saveToTeamFolder', { defaultMessage: 'Save to team folder' })}
+        label={_t('files.saveToTeamFolder', { defaultMessage: 'Save to team folder' })}
         name="saveToTeamFolder"
       />
       {#if $values.saveToTeamFolder}
         <FormTeamFolderSelect
           isNative
           data-testid="SaveFileModal_teamFolderSelect"
-          label={_t('cloud.chooseTeamFolder', { defaultMessage: 'Choose team folder' })}
+          label={_t('files.chooseTeamFolder', { defaultMessage: 'Choose team folder' })}
           name="teamFolderId"
           folderFilter={folder => folder.allowCreate || folder.allowWrite}
         />

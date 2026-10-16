@@ -15,7 +15,7 @@
   import newQuery from '../query/newQuery';
   import { activeRedisKeysStore, focusedTreeRedisKey } from '../stores';
   import { apiCall } from '../utility/api';
-  import { getConnectionInfo } from '../utility/metadataLoaders';
+
   import _ from 'lodash';
   import openNewTab from '../utility/openNewTab';
   import { showSnackbarError } from '../utility/snackbar';

@@ -175,7 +175,6 @@ export const copyRowsFormat = writableWithStorage('textWithoutHeaders', 'copyRow
 export const extensions = writable<ExtensionsDirectory>(null);
 export const visibleCommandPalette = writable(null);
 export const commands = writable({});
-export const rightPanelWidget = writableWithStorage(null, 'rightPanelWidget');
 
 export const currentEditorTheme = getElectron()
   ? writableSettingsValue(null, 'currentEditorTheme')
@@ -190,7 +189,7 @@ export const currentEditorFontSize = getElectron()
   ? writableSettingsValue(null, 'currentEditorFontSize')
   : writableWithStorage(null, 'currentEditorFontSize');
 export const currentEditorFont = writableSettingsValue(null, 'editor.fontFamily');
-export const allowedSendToAiService = writableSettingsValue(false, 'ai.allowSendModels');
+
 export const tabGroupShowServerName = writableSettingsOrLocalValue(false, 'tabGroup.showServerName');
 export const toolbarPosition = writableSettingsOrLocalValue('top', 'settings.toolbarPosition');
 export const activeTabId = derived([openedTabs], ([$openedTabs]) => $openedTabs.find(x => x.selected)?.tabid);
@@ -207,8 +206,6 @@ export const commandsCustomized = derived([commands, commandsSettings], ([$comma
     ...$commandsSettings[k],
   }))
 );
-export const appUpdateStatus = writable(null);
-export const appUpdaterActive = writable(false);
 
 export const draggingTab = writable(null);
 export const draggingTabTarget = writable(null);
@@ -216,7 +213,7 @@ export const draggingDbGroup = writable(null);
 export const draggingDbGroupTarget = writable(null);
 
 export const leftPanelWidth = writableWithStorage(300, 'leftPanelWidth');
-export const rightPanelWidth = writableWithStorage(300, 'rightPanelWidth');
+
 export const currentDropDownMenu = writable(null);
 export const openedModals = writable([]);
 export const draggedPinnedObject = writable(null);
@@ -238,13 +235,6 @@ export const selectedDatabaseObjectAppObject = writable(null);
 export const focusedConnectionOrDatabase = writable<{ conid: string; database?: string; connection: any }>(null);
 
 export const focusedTreeRedisKey = writable<{ key: string; type: string; text: string }>(null);
-
-export const cloudSigninTokenHolder = writableSettingsValue(null, 'cloudSigninTokenHolder');
-export const seenPremiumPromoWidget = writableWithStorage(null, 'seenPremiumPromoWidget');
-
-export const cloudConnectionsStore = writable({});
-
-export const promoWidgetPreview = writable(null);
 
 export const DEFAULT_OBJECT_SEARCH_SETTINGS = {
   pureName: true,
@@ -320,11 +310,10 @@ export const visibleHamburgerMenuWidget = derived(useSettings(), $settings => {
 
 subscribeCssVariable(visibleSelectedWidget, x => (x ? 1 : 0), '--dim-visible-left-panel');
 subscribeCssVariable(leftPanelWidth, x => `${x}px`, '--dim-left-panel-width');
-subscribeCssVariable(rightPanelWidth, x => `${x}px`, '--dim-right-panel-width');
+
 subscribeCssVariable(visibleTitleBar, x => (x ? 1 : 0), '--dim-visible-titlebar');
 subscribeCssVariable(lockedDatabaseMode, x => (x ? 0 : 1), '--dim-visible-tabs-databases');
 subscribeCssVariable(alignDataGridNumbersToRight, x => (x ? 'right' : 'left'), '--data-grid-numbers-align');
-subscribeCssVariable(rightPanelWidget, x => (x ? 1 : 0), '--dim-visible-right-panel');
 
 let activeTabIdValue = null;
 activeTabId.subscribe(value => {
@@ -454,12 +443,6 @@ currentArchive.subscribe(value => {
 });
 export const getCurrentArchive = () => currentArchiveValue;
 
-let appUpdaterActiveValue = false;
-appUpdaterActive.subscribe(value => {
-  appUpdaterActiveValue = value;
-});
-export const getAppUpdaterActive = () => appUpdaterActiveValue;
-
 let appliedCurrentSchemaValue = null;
 appliedCurrentSchema.subscribe(value => {
   appliedCurrentSchemaValue = value;
@@ -512,41 +495,6 @@ focusedTreeRedisKey.subscribe(value => {
 });
 export const getFocusedTreeRedisKey = () => focusedTreeRedisKeyValue;
 
-let cloudConnectionsStoreValue = {};
-cloudConnectionsStore.subscribe(value => {
-  cloudConnectionsStoreValue = value;
-});
-export const getCloudConnectionsStore = () => cloudConnectionsStoreValue;
-
-export const currentActiveCloudTags = derived(currentDatabase, $currentDatabase => {
-  if (!$currentDatabase || !$currentDatabase.connection) return [];
-  const engine = $currentDatabase.connection?.engine;
-  if (!engine) return [];
-  const [shortName, packageName] = engine.split('@');
-  const tags = [shortName];
-  const res = [...tags];
-
-  if (tags.includes('mariadb')) {
-    res.push('mysql');
-  }
-  if (tags.includes('mysql')) {
-    res.push('mariadb');
-  }
-  if (tags.includes('cockroach')) {
-    res.push('postgres');
-  }
-  if (tags.includes('libsql')) {
-    res.push('sqlite');
-  }
-  return res;
-});
-
-let cloudSigninTokenHolderValue = null;
-cloudSigninTokenHolder.subscribe(value => {
-  cloudSigninTokenHolderValue = value;
-});
-export const getCloudSigninTokenHolder = () => cloudSigninTokenHolderValue;
-
 export const toggledDatabases = derived([extensions, useSettings()], ([$extensions, $settings]) => {
   const res = new Map<string, boolean>();
 
@@ -558,6 +506,6 @@ export const toggledDatabases = derived([extensions, useSettings()], ([$extensio
   for (const driver of $extensions.drivers) {
     res.set(driver.title, !hiddenEngines.includes(driver.engine));
   }
-  
+
   return res;
 });

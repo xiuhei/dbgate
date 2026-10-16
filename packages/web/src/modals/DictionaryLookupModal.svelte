@@ -9,7 +9,7 @@
   import { getTableInfo, useAllApps, useConnectionList } from '../utility/metadataLoaders';
   import { getDictionaryDescription } from '../utility/dictionaryDescriptionTools';
   import { onMount } from 'svelte';
-  import { dumpSqlSelect } from 'dbgate-sqltree';
+
   import LoadingInfo from '../elements/LoadingInfo.svelte';
   import SearchInput from '../elements/SearchInput.svelte';
   import FormTextField from '../forms/FormTextField.svelte';

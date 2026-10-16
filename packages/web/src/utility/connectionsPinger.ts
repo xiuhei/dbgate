@@ -8,7 +8,7 @@ import {
 } from '../stores';
 import { apiCall, getVolatileConnections, strmid } from './api';
 import hasPermission from '../utility/hasPermission';
-import { getConfig } from './metadataLoaders';
+
 import { onMount } from 'svelte';
 
 // const doServerPing = async value => {

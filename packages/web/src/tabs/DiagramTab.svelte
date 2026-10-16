@@ -33,9 +33,9 @@
   import WidgetsInnerContainer from '../widgets/WidgetsInnerContainer.svelte';
   import ToolStripButton from '../buttons/ToolStripButton.svelte';
   import ToolStripDropDownButton from '../buttons/ToolStripDropDownButton.svelte';
-  import DiagramSettings from '../designer/DiagramSettings.svelte';
+
   import { derived } from 'svelte/store';
-  import { isProApp } from '../utility/proTools';
+
   import { _t } from '../translations';
   export let tabid;
   export let conid;
@@ -130,8 +130,6 @@
 </script>
 
 <ToolStripContainer>
-  <HorizontalSplitter isSplitter={isProApp() ? ($styleStore.settingsVisible ?? true) : false} initialSizeRight={300}>
-    <svelte:fragment slot="1">
       <DiagramDesigner
         value={$modelState.value || {}}
         {conid}
@@ -141,23 +139,6 @@
         columnFilter={$styleStore.columnFilter}
         onReportCounts={handleReportCounts}
       />
-    </svelte:fragment>
-    <svelte:fragment slot="2">
-      <WidgetColumnBar storageName="diagramSettingsWidget">
-        <WidgetColumnBarItem
-          title="Settings"
-          name="diagramSettings"
-          onClose={() => {
-            styleStore.update(x => ({ ...x, settingsVisible: false }));
-          }}
-        >
-          <WidgetsInnerContainer skipDefineWidth>
-            <DiagramSettings values={styleStore} {tableCounts} />
-          </WidgetsInnerContainer>
-        </WidgetColumnBarItem>
-      </WidgetColumnBar>
-    </svelte:fragment>
-  </HorizontalSplitter>
 
   <svelte:fragment slot="toolstrip">
     <ToolStripCommandButton command="designer.arrange" />
@@ -170,13 +151,6 @@
     <ToolStripCommandButton command="diagram.undo" />
     <ToolStripCommandButton command="diagram.redo" />
     <ToolStripCommandButton command="diagram.deleteSelectedTables" />
-    {#if isProApp()}
-      <ToolStripButton
-        icon="icon settings"
-        on:click={() => {
-          styleStore.update(x => ({ ...x, settingsVisible: !x.settingsVisible }));
-        }}>Settings</ToolStripButton
-      >
-    {/if}
+
   </svelte:fragment>
 </ToolStripContainer>

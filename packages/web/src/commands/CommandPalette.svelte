@@ -72,14 +72,14 @@
 </script>
 
 <script>
-  import { filterName, getConnectionLabel, findEngineDriver, fullNameToLabel } from 'dbgate-tools';
+  import { getConnectionLabel, findEngineDriver, fullNameToLabel } from 'dbgate-tools';
 
   import _ from 'lodash';
   import { onMount } from 'svelte';
   import fuzzy from 'fuzzy';
   import { databaseObjectIcons, handleDatabaseObjectClick } from '../appobj/DatabaseObjectAppObject.svelte';
   import FontIcon from '../icons/FontIcon.svelte';
-  import { runWithCommandSource } from './commandSource';
+
   import {
     commandsCustomized,
     currentDatabase,
@@ -153,7 +153,7 @@
       selectedIndex = 0;
     } else {
       $visibleCommandPalette = null;
-      runWithCommandSource('palette', () => command.onClick());
+      command.onClick();
     }
   }
 

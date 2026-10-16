@@ -2,7 +2,7 @@ import DOMPurify from 'dompurify';
 import { openWebLink } from './simpleTools';
 
 // HTML from untrusted sources - database values, markdown from remote servers (GraphQL schema
-// descriptions, npm plugin READMEs) and AI responses. DOMPurify removes scripts, event handlers
+// descriptions). DOMPurify removes scripts, event handlers
 // and javascript: URLs; <style>, <form> and style attributes are removed as well, as they could
 // restyle or overlay the application UI (e.g. a position:fixed element covering the whole window).
 // With allowStyles, style attributes are kept - the caller must then render the HTML in a

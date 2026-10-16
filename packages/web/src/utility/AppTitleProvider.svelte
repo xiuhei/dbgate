@@ -2,14 +2,14 @@
   import { activeTab, currentDatabase } from '../stores';
   import getElectron from './getElectron';
   import _ from 'lodash';
-  import { isProApp } from './proTools';
+
   import { getConnectionLabel } from 'dbgate-tools';
 
   $: currentDatabaseTitle =
     $currentDatabase?.name == '_api_database_' && $currentDatabase?.connection
       ? getConnectionLabel($currentDatabase.connection, { allowExplicitDatabase: false })
       : $currentDatabase?.name;
-  $: title = _.compact([$activeTab?.title, currentDatabaseTitle, isProApp() ? 'DbGate Premium' : 'DbGate']).join(' - ');
+  $: title = _.compact([$activeTab?.title, currentDatabaseTitle, 'DbGate']).join(' - ');
 
   $: {
     const electron = getElectron();

@@ -11,7 +11,7 @@
   import getElectron from '../utility/getElectron';
   import { usePlatformInfo } from '../utility/metadataLoaders';
   import FontIcon from '../icons/FontIcon.svelte';
-  import { extensions, openedConnections, openedSingleDatabaseConnections } from '../stores';
+  import { openedConnections, openedSingleDatabaseConnections } from '../stores';
   import { _t } from '../translations';
 
   export let isFormReadOnly;

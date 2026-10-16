@@ -25,7 +25,6 @@ jest.mock('../utility/socket', () => ({ emit: jest.fn(), emitChanged: jest.fn() 
 jest.mock('../utility/hasPermission', () => ({ testStandardPermission: jest.fn() }));
 jest.mock('../shell', () => ({}));
 jest.mock('./jsldata', () => ({}));
-jest.mock('../utility/checkLicense', () => ({ isProApp: () => true }));
 
 const { testStandardPermission } = require('../utility/hasPermission');
 const { archivedir, uploadsdir, clearArchiveLinksCache, resolveArchiveFolder } = require('../utility/directories');

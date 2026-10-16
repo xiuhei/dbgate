@@ -41,10 +41,7 @@
   import openNewTab from '../utility/openNewTab';
   import { getFilterValueExpression } from 'dbgate-filterparser';
   import StatusBarTabItem from '../widgets/StatusBarTabItem.svelte';
-  import stableStringify from 'json-stable-stringify';
-  import { getContext } from 'svelte';
-  import { trackUsage } from '../utility/usageAnalytics';
-  import { useConnectionInfo } from '../utility/metadataLoaders';
+
   const TABS_BY_FIELD = {
     tables: {
       text: 'table',
@@ -82,22 +79,6 @@
   let isLoadQueued = false;
   const lastVisibleRowIndexRef = createRef(0);
   const disableLoadNextRef = createRef(false);
-
-  const usageTabId = getContext('tabid');
-  let lastTrackedQuery = null;
-  $: connection = useConnectionInfo({ conid });
-
-  /** A perspective query is defined by the load props of its root node. */
-  function trackDefinedQuery(node: PerspectiveTreeNode) {
-    try {
-      const signature = stableStringify(node.getNodeLoadProps([]));
-      if (signature == lastTrackedQuery) return;
-      lastTrackedQuery = signature;
-      trackUsage({ feature: 'perspective_designer', action: 'execute', engine: $connection?.engine }, usageTabId);
-    } catch {
-      // Analytics must never affect loading of the perspective.
-    }
-  }
 
   // Essential function !!
   // Fills nested data into parentRows (assigns into array parentRows[i][node.fieldName])
@@ -200,7 +181,6 @@
       isLoadQueued = false;
     }
     // console.log('LOADING', node);
-    if (node) trackDefinedQuery(node);
     if (!node) return;
     const rows = [];
     isLoading = true;

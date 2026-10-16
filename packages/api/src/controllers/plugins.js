@@ -1,12 +1,12 @@
 const fs = require('fs-extra');
-const axios = require('axios');
+
 const path = require('path');
 const { extractPackageName, assertValidPluginPackageName } = require('dbgate-tools');
 const { pluginsdir, packagedPluginsDir } = require('../utility/directories');
 const socket = require('../utility/socket');
-const { compareVersions } = require('compare-versions');
+
 const requirePlugin = require('../shell/requirePlugin');
-const downloadPackage = require('../utility/downloadPackage');
+
 const { hasPermission, loadPermissionsFromRequest } = require('../utility/hasPermission');
 const _ = require('lodash');
 const packagedPluginsContent = require('../packagedPluginsContent');
@@ -29,41 +29,6 @@ module.exports = {
       encoding: 'utf-8',
     });
     return data;
-  },
-
-  search_meta: true,
-  async search({ filter }) {
-    // DOCS: https://github.com/npm/registry/blob/master/docs/REGISTRY-API.md#get-v1search
-    const resp = await axios.default.get(
-      `http://registry.npmjs.com/-/v1/search?text=${encodeURIComponent(filter)}+keywords:dbgateplugin&size=25&from=0`
-    );
-    const { objects } = resp.data || {};
-    return (objects || []).map(x => x.package);
-  },
-
-  info_meta: true,
-  async info({ packageName }) {
-    // @ts-ignore
-    const isPackaged = await fs.exists(path.join(packagedPluginsDir(), packageName));
-
-    try {
-      const infoResp = await axios.default.get(`https://registry.npmjs.org/${packageName}`);
-      const { latest } = infoResp.data['dist-tags'];
-      const manifest = infoResp.data.versions[latest];
-      const { readme } = infoResp.data;
-
-      return {
-        readme,
-        manifest,
-        isPackaged,
-      };
-    } catch (err) {
-      return {
-        isPackaged,
-        state: 'error',
-        error: err.message,
-      };
-    }
   },
 
   installed_meta: true,
@@ -113,26 +78,6 @@ module.exports = {
     return res;
   },
 
-  // async saveRemovePlugins() {
-  //   await fs.writeFile(path.join(datadir(), 'removed-plugins'), this.removedPlugins.join('\n'));
-  // },
-
-  install_meta: true,
-  async install({ packageName }, req) {
-    const loadedPermissions = await loadPermissionsFromRequest(req);
-    if (!hasPermission(`plugins/install`, loadedPermissions)) return;
-    assertValidPluginPackageName(packageName);
-    const dir = path.join(pluginsdir(), packageName);
-    // @ts-ignore
-    if (!(await fs.exists(dir))) {
-      await downloadPackage(packageName, dir);
-    }
-    socket.emitChanged(`installed-plugins-changed`);
-    // this.removedPlugins = this.removedPlugins.filter(x => x != packageName);
-    // await this.saveRemovePlugins();
-    return true;
-  },
-
   uninstall_meta: true,
   async uninstall({ packageName }, req) {
     const loadedPermissions = await loadPermissionsFromRequest(req);
@@ -143,22 +88,6 @@ module.exports = {
     socket.emitChanged(`installed-plugins-changed`);
     // this.removedPlugins.push(packageName);
     // await this.saveRemovePlugins();
-    return true;
-  },
-
-  upgrade_meta: true,
-  async upgrade({ packageName }, req) {
-    const loadedPermissions = await loadPermissionsFromRequest(req);
-    if (!hasPermission(`plugins/install`, loadedPermissions)) return;
-    assertValidPluginPackageName(packageName);
-    const dir = path.join(pluginsdir(), packageName);
-    // @ts-ignore
-    if (await fs.exists(dir)) {
-      await fs.rmdir(dir, { recursive: true });
-      await downloadPackage(packageName, dir);
-    }
-
-    socket.emitChanged(`installed-plugins-changed`);
     return true;
   },
 
@@ -195,46 +124,4 @@ module.exports = {
     return driver.getAuthTypes() || null;
   },
 
-  // async _init() {
-  //   const installed = await this.installed();
-  //   try {
-  //     this.removedPlugins = (await fs.readFile(path.join(datadir(), 'removed-plugins'), { encoding: 'utf-8' })).split(
-  //       '\n'
-  //     );
-  //   } catch (err) {
-  //     this.removedPlugins = [];
-  //   }
-
-  //   for (const packageName of Object.keys(preinstallPluginMinimalVersions)) {
-  //     const installedVersion = installed.find(x => x.name == packageName);
-  //     if (installedVersion) {
-  //       // plugin installed, test, whether upgrade
-  //       const requiredVersion = preinstallPluginMinimalVersions[packageName];
-  //       if (compareVersions(installedVersion.version, requiredVersion) < 0) {
-  //         console.log(
-  //           `Upgrading preinstalled plugin ${packageName}, found ${installedVersion.version}, required version ${requiredVersion}`
-  //         );
-  //         await this.upgrade({ packageName });
-  //       } else {
-  //         console.log(
-  //           `Plugin ${packageName} not upgraded, found ${installedVersion.version}, required version ${requiredVersion}`
-  //         );
-  //       }
-
-  //       continue;
-  //     }
-
-  //     if (this.removedPlugins.includes(packageName)) {
-  //       // plugin was remvoed, don't install again
-  //       continue;
-  //     }
-
-  //     try {
-  //       console.log('Preinstalling plugin', packageName);
-  //       await this.install({ packageName });
-  //     } catch (err) {
-  //       console.error('Error preinstalling plugin', packageName, err);
-  //     }
-  //   }
-  // },
 };

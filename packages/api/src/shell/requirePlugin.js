@@ -14,10 +14,7 @@ const dbgateEnv = {
   dbgateApi: null,
   platformInfo,
   authProxy,
-  isProApp: () => {
-    const { isProApp } = require('../utility/checkLicense');
-    return isProApp();
-  },
+
 };
 function requirePlugin(packageName, requiredPlugin = null) {
   if (!packageName) throw new Error('Missing packageName in plugin');

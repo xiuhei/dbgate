@@ -6,7 +6,7 @@ const _ = require('lodash');
 const { jsldir } = require('../utility/directories');
 const { serializeJsTypesReplacer, getLogger, extractErrorMessage } = require('dbgate-tools');
 const { ChartProcessor } = require('dbgate-datalib');
-const { isProApp } = require('./checkLicense');
+
 const { enrichQueryResultColumns } = require('./queryResultMetadata');
 
 const logger = getLogger('handleQueryStream');
@@ -35,9 +35,7 @@ class QueryStreamTableWriter {
     this.writeCurrentStats(false, false);
     this.resultIndex = resultIndex;
     this.initializedFile = true;
-    if (isProApp() && (chartDefinition || autoDetectCharts)) {
-      this.chartProcessor = chartDefinition ? new ChartProcessor([chartDefinition]) : new ChartProcessor();
-    }
+
     process.send({ msgtype: 'recordset', jslid: this.jslid, resultIndex, sesid: this.sesid });
   }
 
@@ -112,15 +110,7 @@ class QueryStreamTableWriter {
           if (this.chartProcessor) {
             try {
               this.chartProcessor.finalize();
-              if (isProApp() && this.chartProcessor.charts.length > 0) {
-                process.send({
-                  msgtype: 'charts',
-                  sesid: this.sesid,
-                  jslid: this.jslid,
-                  charts: this.chartProcessor.charts,
-                  resultIndex: this.resultIndex,
-                });
-              }
+
             } catch (e) {
               console.error('Error finalizing chart processor', e);
               this.chartProcessor = null;

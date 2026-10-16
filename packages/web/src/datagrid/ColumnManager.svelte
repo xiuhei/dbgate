@@ -1,6 +1,6 @@
 <script lang="ts">
-  import _, { add, indexOf, range } from 'lodash';
-  import { ChangeSet, DisplayColumn, GridDisplay } from 'dbgate-datalib';
+  import _, { indexOf, range } from 'lodash';
+  import { ChangeSet, GridDisplay } from 'dbgate-datalib';
   import { filterName } from 'dbgate-tools';
   import CloseSearchButton from '../buttons/CloseSearchButton.svelte';
 

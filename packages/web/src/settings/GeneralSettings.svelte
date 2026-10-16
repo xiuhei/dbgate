@@ -13,30 +13,13 @@
   import hasPermission from '../utility/hasPermission';
   import CheckboxField from '../forms/CheckboxField.svelte';
   import { lockedDatabaseMode, tabGroupShowServerName, toolbarPosition } from '../stores';
-  import { getUsageAnalyticsConsent, setUsageAnalyticsConsent } from '../utility/usageAnalytics';
-  import { useConfig, useSettings } from '../utility/metadataLoaders';
+
+  import { useSettings } from '../utility/metadataLoaders';
 
   const electron = getElectron();
   let restartWarning = false;
-  let usageAnalyticsConsent = getUsageAnalyticsConsent() === true;
-  const config = useConfig();
-  const settings = useSettings();
-  $: analyticsEnvironmentManaged = typeof $config?.usageAnalyticsConsentOverride === 'boolean';
-  $: analyticsPolicy = analyticsEnvironmentManaged
-    ? $config.usageAnalyticsConsentOverride
-      ? 'enabled'
-      : 'disabled'
-    : $config?.storageDatabase
-    ? $settings?.['storage.usageAnalytics']
-    : null;
-  $: analyticsManaged = analyticsPolicy === 'enabled' || analyticsPolicy === 'disabled';
-  $: usageAnalyticsConsent = analyticsManaged ? analyticsPolicy === 'enabled' : getUsageAnalyticsConsent() === true;
 
-  function updateUsageAnalyticsConsent(consent: boolean) {
-    if (analyticsManaged) return;
-    usageAnalyticsConsent = consent;
-    setUsageAnalyticsConsent(consent);
-  }
+  const settings = useSettings();
 </script>
 
 <div class="wrapper">
@@ -80,33 +63,6 @@
     />
   </FormFieldTemplateLarge>
 
-  {#if electron}
-    <FormSelectField
-      label={_t('settings.other.autoUpdateApplication', { defaultMessage: 'Auto update application' })}
-      name="app.autoUpdateMode"
-      isNative
-      defaultValue=""
-      options={[
-        {
-          value: 'skip',
-          label: _t('settings.other.autoUpdateApplication.skip', {
-            defaultMessage: 'Do not check for new versions',
-          }),
-        },
-        {
-          value: '',
-          label: _t('settings.other.autoUpdateApplication.check', { defaultMessage: 'Check for new versions' }),
-        },
-        {
-          value: 'download',
-          label: _t('settings.other.autoUpdateApplication.download', {
-            defaultMessage: 'Check and download new versions',
-          }),
-        },
-      ]}
-    />
-  {/if}
-
   <FormFieldTemplateLarge
     label={_t('settings.connection.showOnlyTabsFromSelectedDatabase', {
       defaultMessage: 'Show only tabs from selected database',
@@ -124,35 +80,6 @@
       data-testid="GeneralSettings_lockedDatabaseMode"
     />
   </FormFieldTemplateLarge>
-
-  <div class="heading">{_t('settings.privacy', { defaultMessage: 'Privacy' })}</div>
-  <FormFieldTemplateLarge
-    label={_t('settings.usageAnalytics', { defaultMessage: 'Send anonymous usage analytics' })}
-    type="checkbox"
-    labelProps={{ onClick: () => updateUsageAnalyticsConsent(!usageAnalyticsConsent) }}
-  >
-    <CheckboxField
-      checked={usageAnalyticsConsent}
-      disabled={analyticsManaged}
-      on:change={e => updateUsageAnalyticsConsent(e.target['checked'])}
-      data-testid="GeneralSettings_usageAnalytics"
-    />
-  </FormFieldTemplateLarge>
-  {#if analyticsManaged}
-    <div class="analyticsDescription" data-testid="GeneralSettings_usageAnalyticsManaged">
-      {analyticsEnvironmentManaged
-        ? _t('settings.usageAnalytics.environmentManaged', {
-            defaultMessage: 'Managed by the USAGE_ANALYTICS environment variable.',
-          })
-        : _t('settings.usageAnalytics.managed', { defaultMessage: 'Managed by your team administrator.' })}
-    </div>
-  {/if}
-  <div class="analyticsDescription">
-    {_t('settings.usageAnalytics.description', {
-      defaultMessage:
-        'Share anonymous feature usage, application version, platform, language, edition, and country. SQL, connection details, and user-created names are never sent.',
-    })}
-  </div>
 
   <div class="heading">{_t('settings.appearance', { defaultMessage: 'Appearance' })}</div>
 
@@ -233,10 +160,4 @@
     max-width: 400px;
   }
 
-  .analyticsDescription {
-    color: var(--theme-generic-font-grayed);
-    margin: calc(-1 * var(--dim-large-form-margin) + 5px) var(--dim-large-form-margin)
-      var(--dim-large-form-margin);
-    max-width: 650px;
-  }
 </style>

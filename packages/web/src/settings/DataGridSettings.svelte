@@ -3,7 +3,7 @@
   import FormSelectField from '../forms/FormSelectField.svelte';
   import FormTextField from '../forms/FormTextField.svelte';
   import { _t } from '../translations';
-  import { isProApp } from '../utility/proTools';
+
 </script>
 
 <div class="wrapper">
@@ -15,14 +15,7 @@
     })}
     defaultValue="100"
   />
-  {#if isProApp()}
-    <FormCheckboxField
-      name="dataGrid.showHintColumns"
-      label={_t('settings.dataGrid.showHintColumns', { defaultMessage: 'Show foreign key hints' })}
-      defaultValue={true}
-      data-testid="DataGridSettings_showHintColumns"
-    />
-  {/if}
+
   <!-- <FormCheckboxField name="dataGrid.showHintColumns" label="Show foreign key hints" defaultValue={true} /> -->
 
   <FormSelectField

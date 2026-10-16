@@ -11,7 +11,6 @@
 </script>
 
 <script lang="ts">
-  import { createFreeTableModel } from 'dbgate-datalib';
 
   import _ from 'lodash';
 
@@ -29,7 +28,7 @@
   import { showModal } from '../modals/modalTools';
   import { currentArchive } from '../stores';
   import { apiCall } from '../utility/api';
-  import { useArchiveFiles, useArchiveFolders } from '../utility/metadataLoaders';
+  import { useArchiveFiles } from '../utility/metadataLoaders';
   import openNewTab from '../utility/openNewTab';
   import WidgetsInnerContainer from './WidgetsInnerContainer.svelte';
 

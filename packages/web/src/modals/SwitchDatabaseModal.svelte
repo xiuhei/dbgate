@@ -5,9 +5,9 @@
   import hasPermission from '../utility/hasPermission';
   import localforage from 'localforage';
   import ModalBase from './ModalBase.svelte';
-  import { v1 as uuidv1 } from 'uuid';
+
   import { closeCurrentModal } from './modalTools';
-  import { copyTextToClipboard } from '../utility/clipboard';
+
   import FormProvider from '../forms/FormProvider.svelte';
   import FormTextField from '../forms/FormTextField.svelte';
   import FormCheckboxField from '../forms/FormCheckboxField.svelte';
@@ -15,7 +15,7 @@
   import FormSelectField from '../forms/FormSelectField.svelte';
   import FormSubmit from '../forms/FormSubmit.svelte';
   import FormButton from '../forms/FormButton.svelte';
-  import { apiCall } from '../utility/api';
+
   import FormConnectionSelect from '../impexp/FormConnectionSelect.svelte';
   import FormDatabaseSelect from '../impexp/FormDatabaseSelect.svelte';
   import { changeTab } from '../utility/common';

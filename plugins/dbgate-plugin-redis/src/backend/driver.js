@@ -21,8 +21,6 @@ const {
 } = require('./redisDumperSupport');
 const { filterName } = global.DBGATE_PACKAGES['dbgate-tools'];
 
-let isProApp;
-
 // Dump connections must never queue or replay commands after losing their socket.
 const dumperConnectionOptions = {
   lazyConnect: true,
@@ -318,27 +316,6 @@ const driver = {
         databaseUrl = url.toString();
       }
       client = new Redis(databaseUrl, { ...protocolOptions, ...dumperOptions });
-    } else if (authType === 'cluster' && isProApp && isProApp()) {
-      const redisOptions = {
-        ...protocolOptions,
-        user,
-        password,
-      };
-
-      let seeds = [];
-      try {
-        seeds = JSON.parse(clusterNodes);
-      } catch {}
-      if (!Array.isArray(seeds) || seeds.length === 0) {
-        throw new Error('Cluster nodes must be a non-empty array of host:port or objects with host and port');
-      }
-
-      const natMap = autoDetectNatMap ? await buildNatMapFromSeeds(seeds, redisOptions) : undefined;
-
-      client = new Redis.Cluster(seeds, {
-        redisOptions,
-        natMap,
-      });
     } else {
       if (_.isString(database) && database.startsWith('db')) db = parseInt(database.substring(2));
       if (_.isNumber(database)) db = database;
@@ -774,12 +751,7 @@ const driver = {
   },
 
   getAuthTypes() {
-    if (isProApp && isProApp()) {
-      return [
-        { name: 'node', title: 'Single Redis node' },
-        { name: 'cluster', title: 'Redis Cluster' },
-      ];
-    }
+
     return null;
   },
 
@@ -793,7 +765,6 @@ const driver = {
 };
 
 driver.initialize = (dbgateEnv) => {
-  isProApp = dbgateEnv.isProApp;
 };
 
 module.exports = driver;

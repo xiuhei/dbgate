@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
-  import { createGridCache, createGridConfig, JslGridDisplay, runMacro, runMacroOnChangeSet } from 'dbgate-datalib';
+
+  import { createGridCache, createGridConfig, JslGridDisplay, runMacroOnChangeSet } from 'dbgate-datalib';
   import { generateTablePairingId, processJsonDataUpdateCommands } from 'dbgate-tools';
   import { writable } from 'svelte/store';
   import JslFormView from '../formview/JslFormView.svelte';
@@ -10,7 +10,6 @@
   import DataGrid from './DataGrid.svelte';
   import JslDataGridCore from './JslDataGridCore.svelte';
   import { useSettings } from '../utility/metadataLoaders';
-  import { isProApp } from '../utility/proTools';
 
   export let jslid;
   export let supportsReload = false;
@@ -45,7 +44,7 @@
   }
 
   function handleRunMacro(macro, params, cells) {
-    trackUsage({ feature: 'data_grid', action: 'run_macro' });
+
     const newChangeSet = runMacroOnChangeSet(
       macro,
       params,
@@ -74,7 +73,7 @@
 
   $: infoWithPairingId = generateTablePairingId($info);
   $: infoUsed = (allowChangeChangeSetStructure && changeSetState?.value?.structure) || infoWithPairingId;
-  $: effectiveQueryResultEditing = queryResultEditing && isProApp();
+  $: effectiveQueryResultEditing = queryResultEditing;
 
   // $: console.log('infoUsed', infoUsed);
 

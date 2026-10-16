@@ -479,13 +479,6 @@ module.exports = {
       return volatile;
     }
 
-    const cloudMatch = conid.match(/^cloud\:\/\/(.+)\/(.+)$/);
-    if (cloudMatch) {
-      const { loadCachedCloudConnection } = require('../utility/cloudIntf');
-      const conn = await loadCachedCloudConnection(cloudMatch[1], cloudMatch[2]);
-      return conn;
-    }
-
     const storage = require('./storage');
 
     const storageConnection = await storage.getConnection({ conid });

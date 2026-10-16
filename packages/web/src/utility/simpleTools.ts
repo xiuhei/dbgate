@@ -32,7 +32,7 @@ export function openWebLink(href, usePopup = false) {
         'noreferrer',
       ];
 
-      window.open(href, 'dbgateCloudLoginPopup', features.join(','));
+      window.open(href, 'dbgateLinkPopup', features.join(','));
     } else {
       window.open(href, '_blank');
     }

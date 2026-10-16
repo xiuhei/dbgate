@@ -9,9 +9,8 @@
   import { apiCall, apiOff, apiOn } from '../utility/api';
   import useEffect from '../utility/useEffect';
   import AllResultsTab from './AllResultsTab.svelte';
-  import JslChart from '../charts/JslChart.svelte';
-  import { isProApp } from '../utility/proTools';
-  import { __t, _t } from '../translations';
+
+  import { _t } from '../translations';
   import createUndoReducer from '../utility/createUndoReducer';
   import ToolStripButton from '../buttons/ToolStripButton.svelte';
   import {
@@ -35,8 +34,6 @@
   export let onSaveQueryResult = null;
 
   export let resultCount;
-  export let onSetFrontMatterField;
-  export let onGetFrontMatter;
 
   onMount(() => {
     allResultsInOneTab = $allResultsInOneTabDefault;
@@ -44,7 +41,7 @@
 
   let allResultsInOneTab = null;
   let resultInfos = [];
-  let charts = [];
+
   let domTabs;
   let changeSetStates = {};
   let changeSetDispatchers = {};
@@ -53,7 +50,7 @@
   let lastResetExecuteNumber = null;
   let changedResultJslids = [];
 
-  $: queryResultEditingEnabled = isProApp();
+  $: queryResultEditingEnabled = true;
   $: resultCount = resultInfos.length;
   $: changedResultJslids = resultInfos
     .map(info => info.jslid)
@@ -75,26 +72,6 @@
     await tick();
     const currentTab = allTabs[domTabs.getValue()];
     if (!currentTab?.isResult) domTabs.setValue(_.findIndex(allTabs, x => x.isResult));
-  };
-
-  const handleCharts = async props => {
-    if (!isProApp()) {
-      return;
-    }
-    charts = [
-      ...charts,
-      {
-        jslid: props.jslid,
-        charts: props.charts,
-        resultIndex: props.resultIndex,
-      },
-    ];
-    const selectedChart = onGetFrontMatter?.()?.['selected-chart'];
-    await tick();
-    if (selectedChart && props.resultIndex == selectedChart - 1) {
-      domTabs.setValue(_.findIndex(allTabs, x => x.isChart && x.resultIndex === props.resultIndex));
-    }
-    // console.log('Charts received for jslid:', props.jslid, 'Charts:', props.charts);
   };
 
   $: oneTab = allResultsInOneTab ?? $allResultsInOneTabDefault;
@@ -132,34 +109,15 @@
             changeSetState: queryResultEditingEnabled ? changeSetStates[info.jslid] : null,
             dispatchChangeSet: queryResultEditingEnabled ? changeSetDispatchers[info.jslid] : null,
             onQueryResultInfoLoaded: value => handleQueryResultInfoLoaded(info.jslid, value),
-            onOpenChart: () => handleOpenChart(info.resultIndex),
+
           },
         }))),
-    ...charts.map((info, index) => ({
-      label: _t('resultTabs.chartNumber', { defaultMessage: 'Chart {number}', values: { number: info.resultIndex + 1 } }),
-      isChart: true,
-      resultIndex: info.resultIndex,
-      component: JslChart,
-      props: {
-        jslid: info.jslid,
-        initialCharts: info.charts,
-        onCloseChart: () => {
-          charts = charts.filter(x => x.resultIndex !== info.resultIndex);
-          onSetFrontMatterField?.(`chart-${info.resultIndex + 1}`, undefined);
-          onSetFrontMatterField?.(`selected-chart`, undefined);
-          const value = _.findIndex(allTabs, x => x.isResult && x.resultIndex === info.resultIndex);
-          domTabs.setValue(value >= 0 ? value : 0);
-        },
-        onEditDefinition: definition => {
-          onSetFrontMatterField?.(`chart-${info.resultIndex + 1}`, definition ?? undefined);
-        },
-      },
-    })),
+
   ];
 
   function resetResultState() {
     resultInfos = [];
-    charts = [];
+
     for (const unsubscribe of Object.values(changeSetUnsubscribers) as any[]) unsubscribe?.();
     changeSetStates = {};
     changeSetDispatchers = {};
@@ -180,10 +138,10 @@
   function onSession(sid) {
     if (sid) {
       apiOn(`session-recordset-${sid}`, handleResultSet);
-      apiOn(`session-charts-${sid}`, handleCharts);
+
       return () => {
         apiOff(`session-recordset-${sid}`, handleResultSet);
-        apiOff(`session-charts-${sid}`, handleCharts);
+
       };
     }
     return () => {};
@@ -193,25 +151,6 @@
   function setOneTabValue(value) {
     allResultsInOneTab = value;
     $allResultsInOneTabDefault = value;
-  }
-
-  async function handleOpenChart(resultIndex) {
-    const chartTab = _.find(allTabs, x => x.isChart && x.resultIndex === resultIndex);
-    if (chartTab) {
-      domTabs.setValue(_.findIndex(allTabs, x => x.isChart && x.resultIndex === resultIndex));
-    } else {
-      charts = [
-        ...charts,
-        {
-          jslid: resultInfos[resultIndex].jslid,
-          charts: [],
-          resultIndex,
-        },
-      ];
-      await tick();
-      domTabs.setValue(_.findIndex(allTabs, x => x.isChart && x.resultIndex === resultIndex));
-    }
-    onSetFrontMatterField?.('selected-chart', resultIndex + 1);
   }
 
   function handleQueryResultInfoLoaded(jslid, info) {
@@ -285,20 +224,6 @@
     }
   }
 
-  export function openCurrentChart() {
-    const currentIndex = domTabs.getValue();
-    // console.log('Current index:', currentIndex);
-    const currentTab = allTabs[currentIndex];
-    // console.log('Current tab:', currentTab);
-    if (currentTab?.isChart) {
-      return;
-    }
-    const resultIndex = currentTab?.resultIndex;
-    // console.log('Result index:', resultIndex);
-    if (resultIndex != null) {
-      handleOpenChart(resultIndex);
-    }
-  }
 </script>
 
 <TabControl
@@ -309,13 +234,6 @@
       ? { text: _t('resultTabs.everyResultInSingleTab', { defaultMessage: 'Every result in single tab' }), onClick: () => setOneTabValue(false) }
       : { text: _t('resultTabs.allResultsInOneTab', { defaultMessage: 'All results in one tab' }), onClick: () => setOneTabValue(true) },
   ]}
-  onUserChange={value => {
-    if (allTabs[value].isChart) {
-      onSetFrontMatterField?.(`selected-chart`, allTabs[value].resultIndex + 1);
-    } else {
-      onSetFrontMatterField?.(`selected-chart`, undefined);
-    }
-  }}
 >
   <slot name="0" slot="0" />
   <slot name="1" slot="1" />

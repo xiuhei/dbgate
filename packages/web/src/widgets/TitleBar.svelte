@@ -8,10 +8,10 @@
   import { isMac } from '../utility/common';
   import getElectron from '../utility/getElectron';
   import { apiOn } from '../utility/api';
-  import { isProApp } from '../utility/proTools';
+
   import { getConnectionLabel } from 'dbgate-tools';
 
-  $: appName = isProApp() ? 'DbGate Premium' : 'DbGate Community';
+  $: appName = 'DbGate';
   $: currentDatabaseTitle =
     $currentDatabase?.name == '_api_database_' && $currentDatabase?.connection
       ? getConnectionLabel($currentDatabase.connection, { allowExplicitDatabase: false })

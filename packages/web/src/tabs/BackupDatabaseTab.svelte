@@ -11,7 +11,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import FontIcon from '../icons/FontIcon.svelte';
   import HorizontalSplitter from '../elements/HorizontalSplitter.svelte';
   import VerticalSplitter from '../elements/VerticalSplitter.svelte';
@@ -41,7 +41,7 @@
   import FormArgumentList from '../forms/FormArgumentList.svelte';
   import FormProviderCore from '../forms/FormProviderCore.svelte';
   import { _t } from '../translations';
-  import { isProApp } from '../utility/proTools';
+
   import { showSnackbarError } from '../utility/snackbar';
   import RunnerOutputFiles from '../query/RunnerOutputFiles.svelte';
 
@@ -63,7 +63,6 @@
   export let database;
 
   const electron = getElectron();
-  const isPremium = isProApp();
 
   const connection = useConnectionInfo({ conid });
   const settings = useSettings();
@@ -77,7 +76,7 @@
 
   $: objectList = $dbinfo?.tables ?? [];
   // Key-value engines (Redis) have no tables to choose from; their key selection lives in the options.
-  $: showObjectList = isPremium && !driver?.databaseEngineTypes?.includes('keyvalue');
+  $: showObjectList = !driver?.databaseEngineTypes?.includes('keyvalue');
 
   $: if ($dbinfo?.tables?.length > 0) {
     checkedObjectsStore.update(x => (x?.length > 0 ? x : $dbinfo.tables));
@@ -96,21 +95,15 @@
   }
 
   function getBackupParams() {
-    const selectedTables = isPremium
-      ? ($checkedObjectsStore ?? []).map(x => _.pick(x, ['pureName', 'schemaName']))
-      : [];
+    const selectedTables = ($checkedObjectsStore ?? []).map(x => _.pick(x, ['pureName', 'schemaName']));
     const selectedTableKeys = new Set(selectedTables.map(x => `${x.schemaName}||${x.pureName}`));
-    const skippedTables = isPremium
-      ? ($dbinfo?.tables ?? [])
+    const skippedTables = ($dbinfo?.tables ?? [])
           .filter(x => !selectedTableKeys.has(`${x.schemaName}||${x.pureName}`))
-          .map(x => _.pick(x, ['pureName', 'schemaName']))
-      : [];
+          .map(x => _.pick(x, ['pureName', 'schemaName']));
     return {
       conid,
       database,
-      options: isPremium
-        ? $valuesStore
-        : { backupTool: driver?.nodejsBackupTool },
+      options: $valuesStore,
       selectedTables,
       skippedTables,
     };
@@ -118,17 +111,11 @@
 
   /** Backup tool used by the operation; 'native' when the driver offers no choice. */
   function getBackupToolName() {
-    return (isPremium ? $valuesStore?.backupTool : driver?.nodejsBackupTool) || 'native';
+    return ($valuesStore?.backupTool) || 'native';
   }
 
   async function handleExecute() {
-    trackUsage({
-      feature: 'backup_database',
-      action: 'execute',
-      tab: 'backup_database',
-      engine: driver?.engine,
-      param: getBackupToolName(),
-    });
+
     busy = true;
     backupCancelled = false;
     operationStatus = 'Running';
@@ -168,25 +155,13 @@
   }
 
   async function handleCancel() {
-    trackUsage({
-      feature: 'backup_database',
-      action: 'cancel',
-      tab: 'backup_database',
-      engine: driver?.engine,
-      param: getBackupToolName(),
-    });
+
     await apiCall('runners/cancel', { runid: runnerId });
     backupCancelled = true;
   }
 
   async function handleGenerateCommand() {
-    trackUsage({
-      feature: 'backup_database',
-      action: 'generate_command',
-      tab: 'backup_database',
-      engine: driver?.engine,
-      param: getBackupToolName(),
-    });
+
     const resp = await apiCall('database-connections/native-backup-command', {
       ...getBackupParams(),
       outputFile: await generateOutputFilePath(),
@@ -239,7 +214,7 @@
 </script>
 
 <ToolStripContainer>
-  <VerticalSplitter initialValue={isPremium ? '~220px' : '200px'}>
+  <VerticalSplitter initialValue="~220px">
     <svelte:fragment slot="1">
       <HorizontalSplitter
         isSplitter={showObjectList}
@@ -367,7 +342,7 @@
                 <RunnerOutputFiles compact {runnerId} {executeNumber} />
               </div>
             {/if}
-            {#if isPremium}
+
               <div class="backup-options">
                 <div class="heading">{_t('backupDatabase.backupOptions', { defaultMessage: 'Backup options' })}</div>
                 <FormProviderCore values={valuesStore}>
@@ -379,7 +354,7 @@
                   <FormArgumentList args={otherFormArgs} />
                 </FormProviderCore>
               </div>
-            {/if}
+
           </div>
         </svelte:fragment>
 
@@ -437,7 +412,7 @@
         >{_t('common.run', { defaultMessage: 'Run' })}</ToolStripButton
       >
     {/if}
-    {#if isPremium && (!driver?.nodejsBackupTool || $valuesStore.backupTool != driver.nodejsBackupTool)}
+    {#if (!driver?.nodejsBackupTool || $valuesStore.backupTool != driver.nodejsBackupTool)}
       <ToolStripButton icon="img shell" on:click={handleGenerateCommand} data-testid="BackupDatabaseTab_generateCommand"
         >{_t('backupDatabase.copyCommandLine', { defaultMessage: 'Copy command line' })}</ToolStripButton
       >

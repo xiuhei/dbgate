@@ -1,21 +1,10 @@
-import {
-  cloudSigninTokenHolder,
-  currentDatabase,
-  emptyConnectionGroupNames,
-  extensions,
-  getAppUpdaterActive,
-  getCloudSigninTokenHolder,
-  getExtensions,
-  promoWidgetPreview,
-  visibleWidgetSideBar,
-  selectedWidget,
-} from '../stores';
-import registerCommand, { GlobalCommand } from './registerCommand';
+import { currentDatabase, emptyConnectionGroupNames, extensions, getExtensions, visibleWidgetSideBar, selectedWidget } from '../stores';
+import registerCommand, {  } from './registerCommand';
 import { get } from 'svelte/store';
 import AboutModal from '../modals/AboutModal.svelte';
 import SqlGeneratorModal from '../modals/SqlGeneratorModal.svelte';
 import { showModal } from '../modals/modalTools';
-import newQuery, { newDiagram, newPerspective, newQueryDesign, newGraphQlQuery } from '../query/newQuery';
+import newQuery, { newDiagram } from '../query/newQuery';
 import saveTabFile from '../utility/saveTabFile';
 import openNewTab from '../utility/openNewTab';
 import getElectron from '../utility/getElectron';
@@ -42,11 +31,11 @@ import ConfirmModal from '../modals/ConfirmModal.svelte';
 import localforage from 'localforage';
 import { openImportExportTab } from '../utility/importExportTools';
 import newTable from '../tableeditor/newTable';
-import { isProApp } from '../utility/proTools';
+
 import { openWebLink } from '../utility/simpleTools';
 import { _t } from '../translations';
 import ExportImportConnectionsModal from '../modals/ExportImportConnectionsModal.svelte';
-import { getBoolSettingsValue, isAiDisabled } from '../settings/settingsTools';
+
 import { __t } from '../translations';
 
 // function themeCommand(theme: ThemeDefinition) {
@@ -116,28 +105,6 @@ registerCommand({
 });
 
 registerCommand({
-  id: 'new.connectionOnCloud',
-  toolbar: true,
-  icon: 'img cloud-connection',
-  toolbarName: __t('command.new.connection', { defaultMessage: 'Add connection' }),
-  category: __t('command.new', { defaultMessage: 'New' }),
-  toolbarOrder: 1,
-  name: __t('command.new.connectionCloud', { defaultMessage: 'Connection on Cloud' }),
-  testEnabled: () =>
-    !getCurrentConfig()?.runAsPortal && !getCurrentConfig()?.storageDatabase && !!getCloudSigninTokenHolder(),
-  onClick: () => {
-    openNewTab({
-      title: _t('common.newConnectionCloud', { defaultMessage: 'New Connection on Cloud' }),
-      icon: 'img cloud-connection',
-      tabComponent: 'ConnectionTab',
-      props: {
-        saveOnCloud: true,
-      },
-    });
-  },
-});
-
-registerCommand({
   id: 'new.connection.folder',
   toolbar: true,
   icon: 'icon add-folder',
@@ -188,106 +155,6 @@ registerCommand({
     });
   },
 });
-
-if (isProApp()) {
-  registerCommand({
-    id: 'new.queryDesign',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'img query-design',
-    name: __t('command.new.queryDesign', { defaultMessage: 'Query design' }),
-    menuName: __t('command.new.newQueryDesign', { defaultMessage: 'New query design' }),
-    onClick: () => newQueryDesign(),
-    testEnabled: () =>
-      getCurrentDatabase() &&
-      findEngineDriver(getCurrentDatabase()?.connection, getExtensions())?.databaseEngineTypes?.includes('sql'),
-  });
-}
-
-if (isProApp()) {
-  registerCommand({
-    id: 'new.modelTransform',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'img transform',
-    name: __t('command.new.modelTransform', { defaultMessage: 'Model transform' }),
-    menuName: __t('command.new.newModelTransform', { defaultMessage: 'New model transform' }),
-    onClick: () => {
-      openNewTab(
-        {
-          title: 'Model transform #',
-          icon: 'img transform',
-          tabComponent: 'ModelTransformTab',
-        },
-        {
-          editor: JSON.stringify(
-            [
-              {
-                transform: 'dataTypeMapperTransform',
-                arguments: ['json', 'nvarchar(max)'],
-              },
-              {
-                transform: 'sqlTextReplacementTransform',
-                arguments: [
-                  {
-                    oldval1: 'newval1',
-                    oldval2: 'newval2',
-                  },
-                ],
-              },
-              {
-                transform: 'autoIndexForeignKeysTransform',
-                arguments: [],
-              },
-            ],
-            null,
-            2
-          ),
-        }
-      );
-    },
-  });
-}
-
-if (isProApp()) {
-  registerCommand({
-    id: 'new.perspective',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'img perspective',
-    name: __t('command.new.perspective', { defaultMessage: 'Perspective' }),
-    menuName: __t('command.new.newPerspective', { defaultMessage: 'New perspective' }),
-    onClick: () => newPerspective(),
-  });
-}
-
-if (isProApp()) {
-  registerCommand({
-    id: 'new.graphqlQuery',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'img graphql',
-    name: __t('command.new.graphqlQuery', { defaultMessage: 'GraphQL Query' }),
-    menuName: __t('command.new.newGraphqlQuery', { defaultMessage: 'New GraphQL Query' }),
-    onClick: () => newGraphQlQuery(),
-    testEnabled: () =>
-      getCurrentDatabase() &&
-      findEngineDriver(getCurrentDatabase()?.connection, getExtensions())?.databaseEngineTypes?.includes('graphql'),
-  });
-}
-
-if (isProApp()) {
-  registerCommand({
-    id: 'new.application',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'img app',
-    name: __t('command.new.application', { defaultMessage: 'Application' }),
-    menuName: __t('command.new.newApplication', { defaultMessage: 'New application' }),
-    onClick: () => {
-      openNewTab({
-        title: 'Application #',
-        icon: 'img app',
-        tabComponent: 'AppEditorTab',
-      });
-    },
-  });
-}
 
 registerCommand({
   id: 'new.diagram',
@@ -395,23 +262,6 @@ registerCommand({
   },
 });
 
-if (isProApp()) {
-  registerCommand({
-    id: 'new.modelCompare',
-    category: __t('command.new', { defaultMessage: 'New' }),
-    icon: 'icon compare',
-    name: __t('command.new.modelCompare', { defaultMessage: 'Compare DB' }),
-    toolbar: true,
-    onClick: () => {
-      openNewTab({
-        title: 'Compare',
-        icon: 'img compare',
-        tabComponent: 'CompareModelTab',
-      });
-    },
-  });
-}
-
 registerCommand({
   id: 'new.jsonl',
   category: __t('command.new', { defaultMessage: 'New' }),
@@ -468,20 +318,6 @@ registerCommand({
         const connection = resp;
         switchCurrentDatabase({ connection, name: `${file}.duckdb` });
       },
-    });
-  },
-});
-
-registerCommand({
-  id: 'tabs.changelog',
-  category: __t('command.tabs', { defaultMessage: 'Tabs' }),
-  name: __t('command.tabs.changelog', { defaultMessage: 'Changelog' }),
-  onClick: () => {
-    openNewTab({
-      title: 'ChangeLog',
-      icon: 'img markdown',
-      tabComponent: 'ChangelogTab',
-      props: {},
     });
   },
 });
@@ -710,89 +546,6 @@ registerCommand({
   },
 });
 
-if (isProApp()) {
-  registerCommand({
-    id: 'database.compare',
-    category: __t('command.database', { defaultMessage: 'Database' }),
-    name: __t('command.database.compare', { defaultMessage: 'Compare databases' }),
-    toolbar: true,
-    icon: 'icon compare',
-    testEnabled: () =>
-      getCurrentDatabase() != null &&
-      findEngineDriver(getCurrentDatabase()?.connection, getExtensions())?.databaseEngineTypes?.includes('sql') &&
-      hasPermission(`dbops/export`),
-    onClick: () => {
-      openNewTab(
-        {
-          title: 'Compare',
-          icon: 'img compare',
-          tabComponent: 'CompareModelTab',
-          props: {
-            conid: getCurrentDatabase()?.connection?._id,
-            database: getCurrentDatabase()?.name,
-          },
-        },
-        {
-          editor: {
-            sourceConid: getCurrentDatabase()?.connection?._id,
-            sourceDatabase: getCurrentDatabase()?.name,
-            targetConid: getCurrentDatabase()?.connection?._id,
-            targetDatabase: getCurrentDatabase()?.name,
-          },
-        }
-      );
-    },
-  });
-
-  registerCommand({
-    id: 'database.chat',
-    category: __t('command.database', { defaultMessage: 'Database' }),
-    name: __t('command.database.chat', { defaultMessage: 'Database chat' }),
-    toolbar: true,
-    icon: 'icon ai',
-    testEnabled: () =>
-      getCurrentDatabase() != null &&
-      findEngineDriver(getCurrentDatabase()?.connection, getExtensions())?.databaseEngineTypes?.includes('sql') &&
-      hasPermission('dbops/chat') &&
-      !isAiDisabled(),
-    onClick: () => {
-      openNewTab({
-        title: 'Chat',
-        icon: 'img ai',
-        tabComponent: 'DatabaseChatTab',
-        props: {
-          conid: getCurrentDatabase()?.connection?._id,
-          database: getCurrentDatabase()?.name,
-        },
-      });
-    },
-  });
-
-  registerCommand({
-    id: 'graphql.chat',
-    category: __t('command.database', { defaultMessage: 'Database' }),
-    name: __t('command.graphql.chat', { defaultMessage: 'GraphQL chat' }),
-    toolbar: true,
-    icon: 'icon ai',
-    testEnabled: () =>
-      getCurrentDatabase() != null &&
-      findEngineDriver(getCurrentDatabase()?.connection, getExtensions())?.databaseEngineTypes?.includes('graphql') &&
-      hasPermission('dbops/chat') &&
-      !isAiDisabled(),
-    onClick: () => {
-      openNewTab({
-        title: 'GraphQL Chat',
-        icon: 'img ai',
-        tabComponent: 'GraphQlChatTab',
-        props: {
-          conid: getCurrentDatabase()?.connection?._id,
-          database: getCurrentDatabase()?.name,
-        },
-      });
-    },
-  });
-}
-
 if (hasPermission('settings/change')) {
   registerCommand({
     id: 'settings.settingsTab',
@@ -831,15 +584,6 @@ if (hasPermission('settings/change')) {
   //   testEnabled: () => hasPermission('settings/change'),
   // });
 }
-
-registerCommand({
-  id: 'cloud.logout',
-  category: __t('command.cloud', { defaultMessage: 'Cloud' }),
-  name: __t('command.cloud.logout', { defaultMessage: 'Logout' }),
-  onClick: () => {
-    cloudSigninTokenHolder.set(null);
-  },
-});
 
 registerCommand({
   id: 'file.exit',
@@ -886,15 +630,6 @@ registerCommand({
   onClick: () => disconnectServerConnection(getCurrentConfig()?.singleConnection?._id),
 });
 
-registerCommand({
-  id: 'app.checkForUpdates',
-  category: __t('command.application', { defaultMessage: 'Application' }),
-  name: __t('command.app.checkForUpdates', { defaultMessage: 'Check for updates' }),
-  // testEnabled: () => true,
-  testEnabled: () => getAppUpdaterActive(),
-  onClick: () => getElectron().send('check-for-updates'),
-});
-
 export function registerFileCommands({
   idPrefix,
   category,
@@ -904,20 +639,17 @@ export function registerFileCommands({
   fileExtension,
   save = true,
   execute = false,
-  executeUsageAnalytics = undefined as GlobalCommand['usageAnalytics'],
-  killUsageAnalytics = undefined as GlobalCommand['usageAnalytics'],
   toggleComment = false,
   findReplace = false,
   undoRedo = false,
   executeAdditionalCondition = null,
   copyPaste = false,
   defaultTeamFolder = false,
-  usageFeature = undefined as string,
 }) {
   if (save) {
     registerCommand({
       id: idPrefix + '.save',
-      usageFeature,
+
       group: 'save',
       category,
       name: __t('command.save', { defaultMessage: 'Save' }),
@@ -930,7 +662,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.saveAs',
-      usageFeature,
+
       group: 'saveAs',
       category,
       name: __t('command.saveAs', { defaultMessage: 'Save As' }),
@@ -939,7 +671,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.saveToDisk',
-      usageFeature,
+
       category,
       name: __t('command.saveToDisk', { defaultMessage: 'Save to disk' }),
       testEnabled: () => getCurrentEditor() != null && getElectron() != null,
@@ -950,8 +682,7 @@ export function registerFileCommands({
   if (execute) {
     registerCommand({
       id: idPrefix + '.execute',
-      usageFeature,
-      usageAnalytics: executeUsageAnalytics,
+
       category,
       name: __t('command.execute', { defaultMessage: 'Execute' }),
       icon: 'icon run',
@@ -966,8 +697,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.kill',
-      usageFeature,
-      usageAnalytics: killUsageAnalytics,
+
       category,
       name: __t('command.kill', { defaultMessage: 'Kill' }),
       icon: 'icon close',
@@ -981,7 +711,7 @@ export function registerFileCommands({
   if (toggleComment) {
     registerCommand({
       id: idPrefix + '.toggleComment',
-      usageFeature,
+
       category,
       name: __t('command.toggleComment', { defaultMessage: 'Toggle comment' }),
       keyText: 'CtrlOrCommand+/',
@@ -994,7 +724,7 @@ export function registerFileCommands({
   if (copyPaste) {
     registerCommand({
       id: idPrefix + '.copy',
-      usageFeature,
+
       category,
       name: __t('command.copy', { defaultMessage: 'Copy' }),
       disableHandleKeyText: 'CtrlOrCommand+C',
@@ -1003,7 +733,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.paste',
-      usageFeature,
+
       category,
       name: __t('command.paste', { defaultMessage: 'Paste' }),
       disableHandleKeyText: 'CtrlOrCommand+V',
@@ -1015,7 +745,7 @@ export function registerFileCommands({
   if (findReplace) {
     registerCommand({
       id: idPrefix + '.find',
-      usageFeature,
+
       category,
       name: __t('command.find', { defaultMessage: 'Find' }),
       keyText: 'CtrlOrCommand+F',
@@ -1024,7 +754,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.replace',
-      usageFeature,
+
       category,
       keyText: isMac() ? 'Alt+Command+F' : 'CtrlOrCommand+H',
       name: __t('command.replace', { defaultMessage: 'Replace' }),
@@ -1035,7 +765,7 @@ export function registerFileCommands({
   if (undoRedo) {
     registerCommand({
       id: idPrefix + '.undo',
-      usageFeature,
+
       category,
       name: __t('command.undo', { defaultMessage: 'Undo' }),
       group: 'undo',
@@ -1045,7 +775,7 @@ export function registerFileCommands({
     });
     registerCommand({
       id: idPrefix + '.redo',
-      usageFeature,
+
       category,
       group: 'redo',
       name: __t('command.redo', { defaultMessage: 'Redo' }),
@@ -1122,14 +852,6 @@ registerCommand({
   category: __t('command.application', { defaultMessage: 'Application' }),
   name: __t('command.application.openIssue', { defaultMessage: 'Report problem or feature request' }),
   onClick: () => openWebLink('https://github.com/dbgate/dbgate/issues/new'),
-});
-
-registerCommand({
-  id: 'app.openSponsoring',
-  category: __t('command.application', { defaultMessage: 'Application' }),
-  name: __t('command.application.becomeSponsor', { defaultMessage: 'Become sponsor' }),
-  testEnabled: () => !isProApp(),
-  onClick: () => openWebLink('https://opencollective.com/dbgate'),
 });
 
 // registerCommand({
@@ -1232,40 +954,6 @@ registerCommand({
   onClick: () => currentDatabase.set(null),
 });
 
-let loadedCampaignList = [];
-
-registerCommand({
-  id: 'internal.loadCampaigns',
-  category: __t('command.internal', { defaultMessage: 'Internal' }),
-  name: __t('command.internal.loadCampaigns', { defaultMessage: 'Load campaign list' }),
-  testEnabled: () => getBoolSettingsValue('internal.showCampaigns', false),
-  onClick: async () => {
-    const resp = await apiCall('cloud/promo-widget-list', {});
-    loadedCampaignList = resp;
-  },
-});
-
-registerCommand({
-  id: 'internal.showCampaigns',
-  category: __t('command.internal', { defaultMessage: 'Internal' }),
-  name: __t('command.internal.showCampaigns', { defaultMessage: 'Show campaigns' }),
-  testEnabled: () => getBoolSettingsValue('internal.showCampaigns', false) && loadedCampaignList?.length > 0,
-  getSubCommands: () => {
-    return loadedCampaignList.map(campaign => ({
-      text: `${campaign.campaignName} (${campaign.countries || 'Global'}) - #${campaign.quantileRank ?? '*'}/${
-        campaign.quantileGroupCount ?? '*'
-      } - ${campaign.variantIdentifier}`,
-      onClick: async () => {
-        promoWidgetPreview.set(
-          await apiCall('cloud/promo-widget-preview', {
-            campaign: campaign.campaignIdentifier,
-            variant: campaign.variantIdentifier,
-          })
-        );
-      },
-    }));
-  },
-});
 
 if (hasPermission('application-log')) {
   registerCommand({
@@ -1283,15 +971,7 @@ if (hasPermission('application-log')) {
 }
 
 if (hasPermission('widgets/plugins')) {
-  registerCommand({
-    id: 'app.managePlugins',
-    category: __t('command.application', { defaultMessage: 'Application' }),
-    name: __t('command.application.managePlugins', { defaultMessage: 'Manage plugins' }),
-    onClick: () => {
-      selectedWidget.set('plugins');
-      visibleWidgetSideBar.set(true);
-    },
-  });
+
 }
 
 const electron = getElectron();

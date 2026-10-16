@@ -12,13 +12,12 @@
   import DefaultActionsSettings from '../settings/DefaultActionsSettings.svelte';
   import BehaviourSettings from '../settings/BehaviourSettings.svelte';
   import ExternalToolsSettings from '../settings/ExternalToolsSettings.svelte';
-  import LicenseSettings from '../settings/LicenseSettings.svelte';
-  import { isProApp } from '../utility/proTools';
+
   import { _t } from '../translations';
   import CommandListTab from './CommandListTab.svelte';
   import DataGridSettings from '../settings/DataGridSettings.svelte';
   import SQLEditorSettings from '../settings/SQLEditorSettings.svelte';
-  import AiSettingsTab from '../settings/AiSettingsTab.svelte';
+
   import hasPermission from '../utility/hasPermission';
   import { useSettings } from '../utility/metadataLoaders';
   import { openedTabs } from '../stores';
@@ -107,23 +106,7 @@
       props: {},
       testid: 'settings-shortcuts',
     },
-    hasPermission('settings/change') &&
-      isProApp() && {
-        label: _t('settings.license', { defaultMessage: 'License' }),
-        identifier: 'license',
-        component: LicenseSettings,
-        props: {},
-        testid: 'settings-license',
-      },
-    hasPermission('settings/change') &&
-      isProApp() &&
-      !$settings?.['storage.disableAiFeatures'] && {
-        label: _t('settings.AI', { defaultMessage: 'AI' }),
-        identifier: 'ai',
-        component: AiSettingsTab,
-        props: {},
-        testid: 'settings-ai',
-      },
+
   ];
 </script>
 

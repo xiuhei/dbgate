@@ -1,5 +1,5 @@
 import resolveApi, { resolveApiHeaders } from './resolveApi';
-import { getUsageAnalyticsConsent } from './usageAnalytics';
+
 import { writable } from 'svelte/store';
 // import { cacheClean } from './cache';
 import getElectron from './getElectron';
@@ -12,11 +12,9 @@ import _ from 'lodash';
 import { v1 as uuidv1 } from 'uuid';
 import { callServerPing } from './connectionsPinger';
 import { batchDispatchCacheTriggers, dispatchCacheChange } from './cache';
-import { isAdminPage, isOneOfPage } from './pageDefs';
+import { isOneOfPage } from './pageDefs';
 import { openWebLink } from './simpleTools';
 import { serializeJsTypesReplacer } from 'dbgate-tools';
-import { cloudSigninTokenHolder, selectedWidget } from '../stores';
-import LicenseLimitMessageModal from '../modals/LicenseLimitMessageModal.svelte';
 
 export const strmid = uuidv1();
 
@@ -150,14 +148,7 @@ async function processApiResponse(route, args, resp) {
     //   missingCredentials: true,
     // };
   } else if (resp?.apiErrorMessage) {
-    if (resp?.apiErrorIsLicenseLimit) {
-      showModal(LicenseLimitMessageModal, {
-        message: resp.apiErrorMessage,
-        licenseLimits: resp.apiErrorLimitedLicenseLimits,
-      });
-    } else {
-      showSnackbarError('API error:' + resp?.apiErrorMessage);
-    }
+    showSnackbarError('API error:' + resp?.apiErrorMessage);
     return {
       errorMessage: resp.apiErrorMessage,
     };
@@ -337,19 +328,11 @@ export function installNewVolatileConnectionListener() {
   });
 }
 
-export function installNewCloudTokenListener() {
-  // console.log('HOLDER', tokenHolder);
-  apiOn('got-cloud-token', async tokenHolder => {
-    cloudSigninTokenHolder.set(tokenHolder);
-    selectedWidget.set('cloud-private');
-  });
-}
-
 export function getAuthCategory(config) {
   if (config.isBasicAuth) {
     return 'basic';
   }
-  if (isOneOfPage('admin', 'admin-license') && config.isAdminLoginForm) {
+  if (isOneOfPage('admin') && config.isAdminLoginForm) {
     return 'admin';
   }
   if (getElectron()) {
@@ -359,18 +342,6 @@ export function getAuthCategory(config) {
     return 'none';
   }
   return 'token';
-}
-
-export function refreshPublicCloudFiles(force = false) {
-  if (sessionStorage.getItem('publicCloudFilesLoaded') && !force) {
-    return;
-  }
-
-  apiCall('cloud/refresh-public-files', {
-    isRefresh: !!sessionStorage.getItem('publicCloudFilesLoaded'),
-    usageAnalyticsConsent: getUsageAnalyticsConsent() === true,
-  });
-  sessionStorage.setItem('publicCloudFilesLoaded', 'true');
 }
 
 let apiSessionIdValue = null;
@@ -398,14 +369,3 @@ function disableApiLog() {
 
 window['enableApiLog'] = enableApiLog;
 window['disableApiLog'] = disableApiLog;
-
-window['__loginToCloudTest'] = async email => {
-  const tokenHolder = await apiCall('auth/cloud-test-login', { email });
-
-  if (tokenHolder) {
-    cloudSigninTokenHolder.set(tokenHolder);
-    selectedWidget.set('cloud-private');
-  } else {
-    showSnackbarError('Login failed');
-  }
-};

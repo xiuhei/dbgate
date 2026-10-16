@@ -98,7 +98,6 @@ module.exports = ({ editMenu, isMac }, currentTranslations = null) => [
       { command: 'app.exportConnections', hideDisabled: true },
       { command: 'app.importConnections', hideDisabled: true },
       { divider: true },
-      { command: 'app.managePlugins', hideDisabled: true },
     ],
   },
   ...(isMac
@@ -115,14 +114,11 @@ module.exports = ({ editMenu, isMac }, currentTranslations = null) => [
       { command: 'app.openDocs', hideDisabled: true },
       { command: 'app.openWeb', hideDisabled: true },
       { command: 'app.openIssue', hideDisabled: true },
-      { command: 'app.openSponsoring', hideDisabled: true },
       // { command: 'app.giveFeedback', hideDisabled: true },
       { divider: true },
       { command: 'settings.commands', hideDisabled: true },
-      { command: 'tabs.changelog', hideDisabled: true },
       { command: 'about.show', hideDisabled: true },
       { divider: true },
-      { command: 'app.checkForUpdates', hideDisabled: true },
     ],
   },
 ];

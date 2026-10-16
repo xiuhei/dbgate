@@ -4,7 +4,7 @@
   import FormProvider from '../forms/FormProvider.svelte';
   import FormSubmit from '../forms/FormSubmit.svelte';
   import FormTextField from '../forms/FormTextField.svelte';
-  import { apiCall } from '../utility/api';
+
   import { _t } from '../translations';
 
   import getElectron from '../utility/getElectron';

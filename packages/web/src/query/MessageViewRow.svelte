@@ -32,7 +32,7 @@
 
   export let previousRow = null;
   export let onMessageClick = null;
-  export let onExplainError = null;
+
   export let engine = null;
 
   let isExpanded = false;
@@ -51,16 +51,7 @@
       <FontIcon icon={plusExpandIcon(isExpanded)} />
     </span>
     {row.message}
-    {#if row.severity == 'error' && onExplainError}
-      <InlineButton
-        title="Explain error"
-        inlineBlock
-        data-testid={`MessageViewRow-explainErrorButton-${index}`}
-        on:click={e => {
-          onExplainError(row);
-        }}><FontIcon icon="img ai" /> Explain</InlineButton
-      >
-    {/if}
+
     {#if row.jslid}
       <InlineButton
         title="Show data"

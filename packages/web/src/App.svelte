@@ -14,51 +14,20 @@
   // import { shouldWaitForElectronInitialize } from './utility/getElectron';
   import { subscribeConnectionPingers } from './utility/connectionsPinger';
   import { subscribePermissionCompiler } from './utility/hasPermission';
-  import {
-    apiCall,
-    installNewCloudTokenListener,
-    installNewVolatileConnectionListener,
-    refreshPublicCloudFiles,
-  } from './utility/api';
-  import { getAllApps, getConfig, getSettings, useConfig, useSettings } from './utility/metadataLoaders';
+  import { apiCall, installNewVolatileConnectionListener } from './utility/api';
+  import { getAllApps, getConfig, getSettings } from './utility/metadataLoaders';
   import AppTitleProvider from './utility/AppTitleProvider.svelte';
   import getElectron from './utility/getElectron';
   import AppStartInfo from './widgets/AppStartInfo.svelte';
   import SettingsListener from './utility/SettingsListener.svelte';
   import { handleAuthOnStartup } from './clientAuth';
-  import { initializeAppUpdates } from './utility/appUpdate';
+
   import { _t, getCurrentTranslations, saveSelectedLanguageToCache } from './translations';
-  import { installCloudListeners } from './utility/cloudListeners';
-  import { showModal } from './modals/modalTools';
-  import UsageAnalyticsConsentModal from './modals/UsageAnalyticsConsentModal.svelte';
-  import {
-    getUsageAnalyticsConsent,
-    flushUsageAnalytics,
-    setUsageAnalyticsConsent,
-    trackUsage,
-  } from './utility/usageAnalytics';
 
   export let isAdminPage = false;
 
   let loadedApi = false;
   let loadedPlugins = false;
-  let usageAnalyticsStartupHandled = false;
-  const analyticsSettings = useSettings();
-  const analyticsConfig = useConfig();
-
-  $: if (
-    loadedApi &&
-    ($analyticsConfig?.usageAnalyticsConsentOverride === false ||
-      $analyticsSettings?.['storage.usageAnalytics'] === 'disabled')
-  ) {
-    if (getUsageAnalyticsConsent() === false) flushUsageAnalytics();
-  }
-
-  function handleUsageAnalyticsConsent(consent: boolean) {
-    setUsageAnalyticsConsent(consent);
-    refreshPublicCloudFiles();
-    if (consent) trackUsage({ feature: 'application', action: 'start' });
-  }
 
   async function loadApi() {
     // if (shouldWaitForElectronInitialize()) {
@@ -82,9 +51,6 @@
         subscribeConnectionPingers();
         subscribePermissionCompiler();
         installNewVolatileConnectionListener();
-        installNewCloudTokenListener();
-        initializeAppUpdates();
-        installCloudListeners();
         saveSelectedLanguageToCache(config.preferrendLanguage);
 
         const electron = getElectron();
@@ -121,16 +87,6 @@
     }
   }
 
-  $: if (loadedPlugins && !usageAnalyticsStartupHandled) {
-    usageAnalyticsStartupHandled = true;
-    const consent = getUsageAnalyticsConsent();
-    if (consent === null) {
-      showModal(UsageAnalyticsConsentModal, { onConsent: handleUsageAnalyticsConsent });
-    } else {
-      refreshPublicCloudFiles();
-      if (consent) trackUsage({ feature: 'application', action: 'start' });
-    }
-  }
 </script>
 
 <ErrorHandler />

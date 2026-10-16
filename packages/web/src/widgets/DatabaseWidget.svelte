@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { useCloudContentList, useConfig, useConnectionInfo } from '../utility/metadataLoaders';
+  import { useConfig } from '../utility/metadataLoaders';
 
   import ConnectionList from './ConnectionList.svelte';
 
@@ -14,7 +14,6 @@
   let domSqlObjectList = null;
 
   $: config = useConfig();
-  $: cloudContentList = useCloudContentList();
 </script>
 
 <WidgetColumnBar {hidden} storageName="databaseWidget">
@@ -32,11 +31,10 @@
       <ConnectionList
         passProps={{
           onFocusSqlObjectList: () => domSqlObjectList.focus(),
-          cloudContentList: $cloudContentList,
         }}
       />
     </WidgetColumnBarItem>
   {/if}
 
-  <DatabaseWidgetDetailContent bind:domSqlObjectList showCloudConnection={false} />
+  <DatabaseWidgetDetailContent bind:domSqlObjectList />
 </WidgetColumnBar>

@@ -37,7 +37,6 @@
   import CloseSearchButton from '../buttons/CloseSearchButton.svelte';
   import { extractDbNameFromComposite, findEngineDriver } from 'dbgate-tools';
   import {
-    currentDatabase,
     databaseObjectAppObjectSearchSettings,
     extensions,
     focusedConnectionOrDatabase,

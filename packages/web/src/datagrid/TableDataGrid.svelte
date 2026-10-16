@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import {
     createGridCache,
     createGridConfig,
@@ -15,15 +15,7 @@
   import { extensions } from '../stores';
   import stableStringify from 'json-stable-stringify';
 
-  import {
-    useAllApps,
-    useConnectionInfo,
-    useConnectionList,
-    useDatabaseInfo,
-    useDatabaseServerVersion,
-    useServerVersion,
-    useSettings,
-  } from '../utility/metadataLoaders';
+  import { useAllApps, useConnectionInfo, useConnectionList, useDatabaseInfo, useDatabaseServerVersion, useSettings } from '../utility/metadataLoaders';
 
   import DataGrid from './DataGrid.svelte';
   import ReferenceHeader from './ReferenceHeader.svelte';
@@ -31,7 +23,6 @@
   import SqlFormView from '../formview/SqlFormView.svelte';
   import { getBoolSettingsValue } from '../settings/settingsTools';
   import { getDictionaryDescription } from '../utility/dictionaryDescriptionTools';
-  import { isProApp } from '../utility/proTools';
 
   export let conid;
   export let database;
@@ -85,7 +76,7 @@
               ?.tablePermissionRole == 'read',
           isRawMode,
           $settingsValue,
-          isProApp()
+          true
         )
       : null;
 
@@ -154,7 +145,7 @@
   };
 
   function handleRunMacro(macro, params, cells) {
-    trackUsage({ feature: 'data_grid', action: 'run_macro', engine: $connection?.engine });
+
     const newChangeSet = runMacroOnChangeSet(macro, params, cells, changeSetState?.value, display, false);
     if (newChangeSet) {
       dispatchChangeSet({ type: 'set', value: newChangeSet });

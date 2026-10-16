@@ -15,25 +15,13 @@ export default async function saveTabFile(editor, saveMode, folder, format, file
   const tabs = get(openedTabs);
   const tabid = editor.activator.tabid;
   const data = editor.getData();
-  const { savedFile, savedFilePath, savedFolder, savedCloudFolderId, savedCloudContentId, savedTeamFileId } =
+  const { savedFile, savedFilePath, savedFolder, savedTeamFileId } =
     tabs.find(x => x.tabid == tabid).props || {};
 
   const handleSave = async () => {
     if (savedTeamFileId) {
       const resp = await apiCall('team-files/update', { teamFileId: savedTeamFileId, data });
       markTabSaved(tabid);
-    } else if (savedCloudFolderId && savedCloudContentId) {
-      const resp = await apiCall('cloud/save-file', {
-        folid: savedCloudFolderId,
-        fileName: savedFile,
-        data,
-        contentFolder: folder,
-        format,
-        cntid: savedCloudContentId,
-      });
-      if (resp.cntid) {
-        markTabSaved(tabid);
-      }
     } else {
       if (savedFile) {
         await apiCall('files/save', { folder: savedFolder || folder, file: savedFile, data, format });
@@ -78,8 +66,6 @@ export default async function saveTabFile(editor, saveMode, folder, format, file
         savedFile: null,
         savedFolder: null,
         savedFilePath: file,
-        savedCloudFolderId: null,
-        savedCloudContentId: null,
       });
     }
   } else if ((savedFile || savedFilePath) && saveMode == 'save') {
@@ -93,9 +79,7 @@ export default async function saveTabFile(editor, saveMode, folder, format, file
       name: savedFile || 'newFile',
       filePath: savedFilePath,
       onSave,
-      folid: savedCloudFolderId,
       defaultTeamFolder,
-      // cntid: savedCloudContentId,
     });
   }
 }

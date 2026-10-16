@@ -25,7 +25,7 @@
 </script>
 
 <script lang="ts">
-  import _, { values } from 'lodash';
+  import _, {  } from 'lodash';
   import { draggedPinnedObject, extensions, pinnedDatabases, pinnedTables } from '../stores';
   import { getConnectionLabel } from 'dbgate-tools';
   import { currentThemeType } from '../plugins/themes';

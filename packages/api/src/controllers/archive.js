@@ -18,7 +18,7 @@ const jsldata = require('./jsldata');
 const platformInfo = require('../utility/platformInfo');
 const { testStandardPermission } = require('../utility/hasPermission');
 const { checkUploadedFilePath, copyExportFile } = require('../utility/security');
-const { isProApp } = require('../utility/checkLicense');
+
 const listZipEntries = require('../utility/listZipEntries');
 const unzipJsonLinesFile = require('../shell/unzipJsonLinesFile');
 const { zip } = require('lodash');
@@ -98,13 +98,11 @@ module.exports = {
     const entries = await listZipEntries(path.join(archivedir(), file));
     const files = entries.map(entry => {
       let name = entry.fileName;
-      if (isProApp() && entry.fileName.endsWith('.jsonl')) {
-        name = entry.fileName.slice(0, -6);
-      }
+
       return {
         name: name,
         label: name,
-        type: isProApp() && entry.fileName.endsWith('.jsonl') ? 'jsonl' : 'other',
+        type: 'other',
       };
     });
     return files;

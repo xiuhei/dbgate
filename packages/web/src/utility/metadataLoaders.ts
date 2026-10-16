@@ -8,10 +8,10 @@ import {
   unsubscribeCachePeek,
 } from './cache';
 import stableStringify from 'json-stable-stringify';
-import { derived, writable } from 'svelte/store';
+import { derived } from 'svelte/store';
 import { extendDatabaseInfo } from 'dbgate-tools';
 import { setLocalStorage } from '../utility/storageCache';
-import { apiCall, apiOff, apiOn } from './api';
+import { apiCall } from './api';
 
 const databaseInfoLoader = ({ conid, database, modelTransFile }) => ({
   url: 'database-connections/structure',
@@ -88,19 +88,6 @@ const databaseListLoader = ({ conid }) => ({
     if (value?.length > 0) setLocalStorage(`database_list_${conid}`, value);
   },
   errorValue: [],
-});
-
-const serverChatDatabaseListLoader = ({ conid, filter }) => ({
-  url: 'server-connections/chat-databases',
-  params: { conid, filter },
-  reloadTrigger: { key: `database-list-changed`, conid },
-});
-
-const serverChatDatabaseStructureLoader = ({ conid, database }) => ({
-  url: 'server-connections/database-structure',
-  params: { conid, database },
-  reloadTrigger: { key: `database-structure-changed`, conid, database },
-  transform: value => (!value || value.errorMessage ? value : extendDatabaseInfo(value)),
 });
 
 const restApiInfoLoader = ({ conid }) => ({
@@ -203,23 +190,6 @@ const authTypesLoader = ({ engine }) => ({
   errorValue: null,
 });
 
-const publicCloudErrorStore = writable(false);
-const cloudContentErrorStore = writable(false);
-
-const publicCloudFilesLoader = () => ({
-  url: 'cloud/public-files',
-  params: {},
-  reloadTrigger: { key: `public-cloud-changed` },
-  errorValue: [],
-  onError: err => publicCloudErrorStore.set(!!err),
-});
-const cloudContentListLoader = () => ({
-  url: 'cloud/content-list',
-  params: {},
-  reloadTrigger: { key: `cloud-content-changed` },
-  errorValue: [],
-  onError: err => cloudContentErrorStore.set(!!err),
-});
 const teamFilesLoader = () => ({
   url: 'team-files/list',
   params: {},
@@ -232,11 +202,7 @@ const teamFoldersLoader = () => ({
   reloadTrigger: { key: `team-folders-changed` },
   errorValue: [],
 });
-const promoWidgetLoader = () => ({
-  url: 'cloud/premium-promo-widget',
-  params: {},
-  reloadTrigger: { key: `promo-widget-changed` },
-});
+
 const fileThemesLoader = () => ({
   url: 'files/get-file-themes',
   params: {},
@@ -433,14 +399,6 @@ export function useDatabaseList(args) {
   return useCore(databaseListLoader, args);
 }
 
-export function getServerChatDatabaseList(args) {
-  return getCore(serverChatDatabaseListLoader, args);
-}
-
-export function getServerChatDatabaseStructure(args) {
-  return getCore(serverChatDatabaseStructureLoader, args);
-}
-
 export function getServerVersion(args) {
   return getCore(serverVersionLoader, args);
 }
@@ -580,26 +538,6 @@ export function useSchemaList(args) {
   return useCore(schemaListLoader, args);
 }
 
-export function getPublicCloudFiles(args) {
-  return getCore(publicCloudFilesLoader, args);
-}
-export function usePublicCloudFiles(args = {}) {
-  return useCore(publicCloudFilesLoader, args);
-}
-export function usePublicCloudError() {
-  return publicCloudErrorStore;
-}
-
-export function getCloudContentList(args) {
-  return getCore(cloudContentListLoader, args);
-}
-export function useCloudContentList(args = {}) {
-  return useCore(cloudContentListLoader, args);
-}
-export function useCloudContentError() {
-  return cloudContentErrorStore;
-}
-
 export function getTeamFiles(args) {
   return getCore(teamFilesLoader, args);
 }
@@ -612,13 +550,6 @@ export function getTeamFolders(args = {}) {
 }
 export function useTeamFolders(args = {}) {
   return useCore(teamFoldersLoader, args);
-}
-
-export function getPromoWidget(args) {
-  return getCore(promoWidgetLoader, args);
-}
-export function usePromoWidget(args) {
-  return useCore(promoWidgetLoader, args);
 }
 
 export function getFileThemes(args = {}) {

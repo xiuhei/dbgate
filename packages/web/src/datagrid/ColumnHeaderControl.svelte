@@ -5,14 +5,9 @@
   import _ from 'lodash';
 
   import ColumnLabel from '../elements/ColumnLabel.svelte';
-  import { isTypeDateTime } from 'dbgate-tools';
+
   import { openDatabaseObjectDetail } from '../appobj/DatabaseObjectAppObject.svelte';
   import { copyTextToClipboard } from '../utility/clipboard';
-  import VirtualForeignKeyEditorModal from '../tableeditor/VirtualForeignKeyEditorModal.svelte';
-  import { showModal } from '../modals/modalTools';
-  import DefineDictionaryDescriptionModal from '../modals/DefineDictionaryDescriptionModal.svelte';
-  import { sleep } from '../utility/common';
-  import { isProApp } from '../utility/proTools';
 
   export let column;
   export let conid = undefined;
@@ -40,29 +35,6 @@
     });
   };
 
-  const handleDefineVirtualForeignKey = () => {
-    showModal(VirtualForeignKeyEditorModal, {
-      schemaName: column.schemaName,
-      pureName: column.pureName,
-      conid,
-      database,
-      columnName: column.columnName,
-    });
-  };
-
-  const handleCustomizeDescriptions = () => {
-    showModal(DefineDictionaryDescriptionModal, {
-      conid,
-      database,
-      schemaName: column.foreignKey.refSchemaName,
-      pureName: column.foreignKey.refTableName,
-      onConfirm: async () => {
-        await sleep(100);
-        onReload?.();
-      },
-    });
-  };
-
   function getMenu() {
     return [
       setSort && { onClick: () => setSort('ASC'), text: 'Sort ascending' },
@@ -74,36 +46,8 @@
 
       column.foreignKey && [{ divider: true }, { onClick: openReferencedTable, text: column.foreignKey.refTableName }],
 
-      isProApp() &&
-        setGrouping &&
-        !driver?.dialect?.disableGroupingForDataType?.(column.dataType) && [
-          { divider: true },
-          { onClick: () => setGrouping('GROUP'), text: 'Group by' },
-          { onClick: () => setGrouping('MAX'), text: 'MAX' },
-          { onClick: () => setGrouping('MIN'), text: 'MIN' },
-          { onClick: () => setGrouping('SUM'), text: 'SUM' },
-          { onClick: () => setGrouping('AVG'), text: 'AVG' },
-          { onClick: () => setGrouping('COUNT'), text: 'COUNT' },
-          { onClick: () => setGrouping('COUNT DISTINCT'), text: 'COUNT DISTINCT' },
-        ],
-
-      isProApp() &&
-        isTypeDateTime(column.dataType) && [
-          { divider: true },
-          { onClick: () => setGrouping('GROUP:YEAR'), text: 'Group by YEAR' },
-          { onClick: () => setGrouping('GROUP:MONTH'), text: 'Group by MONTH' },
-          { onClick: () => setGrouping('GROUP:DAY'), text: 'Group by DAY' },
-        ],
-
       { divider: true },
 
-      isProApp() &&
-        allowDefineVirtualReferences && { onClick: handleDefineVirtualForeignKey, text: 'Define virtual foreign key' },
-      column.foreignKey &&
-        isProApp() && {
-          onClick: handleCustomizeDescriptions,
-          text: 'Customize description',
-        },
     ];
   }
 </script>

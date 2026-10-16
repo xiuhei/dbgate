@@ -1,10 +1,10 @@
 <script lang="ts">
-  import { filterName, getConnectionLabel } from 'dbgate-tools';
+  import { filterName } from 'dbgate-tools';
   import _ from 'lodash';
   import { useDatabaseList } from '../utility/metadataLoaders';
   import AppObjectList from './AppObjectList.svelte';
   import * as databaseAppObject from './DatabaseAppObject.svelte';
-  import { volatileConnectionMapStore } from '../utility/api';
+
   import { getLocalStorage } from '../utility/storageCache';
 
   export let filter;

@@ -4,8 +4,7 @@ const fs = require('fs');
 // const unhandled = require('electron-unhandled');
 // const { openNewGitHubIssue, debugInfo } = require('electron-util');
 const { Menu, ipcMain } = require('electron');
-const { autoUpdater } = require('electron-updater');
-const log = require('electron-log');
+
 const _cloneDeepWith = require('lodash.clonedeepwith');
 
 // Module to control application life.
@@ -16,33 +15,20 @@ const BrowserWindow = electron.BrowserWindow;
 const path = require('path');
 const url = require('url');
 const mainMenuDefinition = require('./mainMenuDefinition');
-const { isProApp } = require('./proTools');
-const updaterChannel = require('./updaterChannel');
-const flushAnalyticsOnClose = require('./flushAnalyticsOnClose');
+
 const { getErrorCategory } = require('./errorCategory');
 
 // require('@electron/remote/main').initialize();
 
 const configRootPath = path.join(app.getPath('userData'), 'config-root.json');
-// Crashes cannot be sent from a dying process, they are recorded here and reported by the
-// frontend when the window runs again. Only the action and the error category are stored.
-const crashReportsPath = path.join(app.getPath('userData'), 'crash-reports.json');
-const MAX_STORED_CRASH_REPORTS = 10;
-const RENDERER_GONE_CATEGORIES = {
-  oom: 'out_of_memory',
-  crashed: 'renderer_crashed',
-  killed: 'process_killed',
-  'launch-failed': 'launch_failed',
-  'integrity-failure': 'integrity_failure',
-  'abnormal-exit': 'abnormal_exit',
-};
+
 let saveConfigOnExit = true;
 let initialConfig = {};
 let apiLoaded = false;
 let mainModule;
 // let getLogger;
 // let loadLogsContent;
-let appUpdateStatus = '';
+
 let settingsJson = {};
 
 function getTranslated(key) {
@@ -55,40 +41,13 @@ function getTranslated(key) {
   return key;
 }
 
-function storeCrashReport(action, category) {
-  try {
-    let reports = [];
-    if (fs.existsSync(crashReportsPath)) {
-      const parsed = JSON.parse(fs.readFileSync(crashReportsPath, 'utf-8'));
-      if (Array.isArray(parsed)) reports = parsed;
-    }
-    reports.push({ action, param: category });
-    fs.writeFileSync(crashReportsPath, JSON.stringify(reports.slice(-MAX_STORED_CRASH_REPORTS)));
-  } catch (err) {
-    console.error('Error storing crash report', err);
-  }
-}
-
-function sendStoredCrashReports() {
-  try {
-    if (!fs.existsSync(crashReportsPath)) return;
-    const reports = JSON.parse(fs.readFileSync(crashReportsPath, 'utf-8'));
-    fs.unlinkSync(crashReportsPath);
-    for (const report of Array.isArray(reports) ? reports : []) {
-      mainWindow.webContents.send('report-crash', report);
-    }
-  } catch (err) {
-    console.error('Error sending crash reports', err);
-  }
-}
-
 process.on('uncaughtException', function (error) {
-  storeCrashReport('crash_backend', getErrorCategory(error));
+
   console.error('uncaughtException', error);
 });
 
 process.on('unhandledRejection', function (error) {
-  storeCrashReport('crash_backend', getErrorCategory(error));
+
   console.error('unhandledRejection', error);
 });
 
@@ -121,15 +80,6 @@ let mainWindow;
 let mainMenu;
 let runCommandOnLoad = null;
 let mainWindowMenuSet = false;
-
-log.transports.file.level = 'debug';
-autoUpdater.logger = log;
-if (updaterChannel) {
-  autoUpdater.channel = updaterChannel;
-  autoUpdater.allowPrerelease = updaterChannel.includes('beta');
-}
-// TODO - create settings for this
-// appUpdater.channel = 'beta';
 
 let commands = {};
 
@@ -264,7 +214,6 @@ ipcMain.on('open-dev-tools', () => {
   mainWindow.webContents.openDevTools();
 });
 ipcMain.on('app-started', async (event, arg) => {
-  sendStoredCrashReports();
 
   if (runCommandOnLoad) {
     mainWindow.webContents.send('run-command', runCommandOnLoad);
@@ -273,15 +222,6 @@ ipcMain.on('app-started', async (event, arg) => {
 
   if (initialConfig['winIsMaximized']) {
     mainWindow.webContents.send('setIsMaximized', true);
-  }
-  if (autoUpdater.isUpdaterActive()) {
-    mainWindow.webContents.send('setAppUpdaterActive');
-  }
-  if (!process.env.DEVMODE) {
-    if (settingsJson['app.autoUpdateMode'] != 'skip') {
-      autoUpdater.autoDownload = settingsJson['app.autoUpdateMode'] == 'download';
-      autoUpdater.checkForUpdates();
-    }
   }
 
   if (initialConfig['winZoomLevel'] != null) {
@@ -378,20 +318,7 @@ ipcMain.handle('showItemInFolder', async (event, path) => {
 ipcMain.handle('openExternal', async (event, url) => {
   electron.shell.openExternal(url);
 });
-ipcMain.on('downloadUpdate', async (event, url) => {
-  autoUpdater.downloadUpdate();
-  changeAppUpdateStatus({
-    icon: 'icon loading',
-    message: `Downloading update...`,
-  });
-});
-ipcMain.on('applyUpdate', async (event, url) => {
-  autoUpdater.quitAndInstall(false, true);
-});
-ipcMain.on('check-for-updates', async (event, url) => {
-  autoUpdater.autoDownload = false;
-  autoUpdater.checkForUpdates();
-});
+
 ipcMain.on('translation-data', async (event, arg) => {
   global.TRANSLATION_DATA = JSON.parse(arg);
   mainMenu = buildMenu();
@@ -453,13 +380,13 @@ function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
     height: 800,
-    title: isProApp() ? 'DbGate Premium' : 'DbGate',
+    title: 'DbGate',
     frame: useNativeMenu,
     titleBarStyle: useNativeMenu ? undefined : 'hidden',
     backgroundColor: electron.nativeTheme.shouldUseDarkColors ? '#111111' : undefined,
     ...bounds,
     icon: os.platform() == 'win32' ? 'icon.ico' : path.resolve(__dirname, '../icon.png'),
-    partition: isProApp() ? 'persist:dbgate-premium' : 'persist:dbgate',
+    partition: 'persist:dbgate',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -467,13 +394,11 @@ function createWindow() {
     },
   });
 
-  flushAnalyticsOnClose(mainWindow, app);
-
   // The frontend cannot report that its own process died, so the reason is recorded here.
   mainWindow.webContents.on('render-process-gone', (event, details) => {
     const reason = details?.reason;
     if (reason == 'clean-exit') return;
-    storeCrashReport('crash', RENDERER_GONE_CATEGORIES[reason] || 'unknown');
+
     console.error('render-process-gone', details);
   });
 
@@ -579,60 +504,6 @@ function createWindow() {
     mainModule.setElectronSender(null);
   });
 }
-
-function changeAppUpdateStatus(status) {
-  appUpdateStatus = status;
-  mainWindow.webContents.send('app-update-status', appUpdateStatus);
-}
-
-autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for updates');
-  changeAppUpdateStatus({
-    icon: 'icon loading',
-    message: 'Checking for updates...',
-  });
-});
-
-autoUpdater.on('update-available', info => {
-  console.log('Update available', info);
-  if (autoUpdater.autoDownload) {
-    changeAppUpdateStatus({
-      icon: 'icon loading',
-      message: `Downloading update...`,
-    });
-  } else {
-    mainWindow.webContents.send('update-available', info.version);
-    changeAppUpdateStatus({
-      icon: 'icon download',
-      message: `Update available`,
-    });
-  }
-});
-
-autoUpdater.on('update-not-available', info => {
-  console.log('Update not available', info);
-  changeAppUpdateStatus({
-    icon: 'icon check',
-    message: `No new updates`,
-  });
-});
-
-autoUpdater.on('update-downloaded', info => {
-  console.log('Update downloaded from', info);
-  changeAppUpdateStatus({
-    icon: 'icon download',
-    message: `Downloaded ${info.version}`,
-  });
-  mainWindow.webContents.send('downloaded-new-version', info.version);
-});
-
-autoUpdater.on('error', error => {
-  changeAppUpdateStatus({
-    icon: 'icon error',
-    message: `Autoupdate error`,
-  });
-  console.error('Update error', error);
-});
 
 function onAppReady() {
   createWindow();

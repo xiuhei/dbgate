@@ -64,7 +64,7 @@
   import { editorDeleteColumn, editorDeleteConstraint } from 'dbgate-tools';
 
   import _ from 'lodash';
-  import { onMount, tick } from 'svelte';
+  import { tick } from 'svelte';
   import invalidateCommands from '../commands/invalidateCommands';  import ColumnLabel from '../elements/ColumnLabel.svelte';
   import ConstraintLabel from '../elements/ConstraintLabel.svelte';
   import ForeignKeyObjectListControl from '../elements/ForeignKeyObjectListControl.svelte';
@@ -75,7 +75,6 @@
   import useEditorData from '../query/useEditorData';
   import createActivator from '../utility/createActivator';
 
-  import { useDbCore } from '../utility/metadataLoaders';
   import ColumnEditorModal from './ColumnEditorModal.svelte';
   import ForeignKeyEditorModal from './ForeignKeyEditorModal.svelte';
   import IndexEditorModal from './IndexEditorModal.svelte';

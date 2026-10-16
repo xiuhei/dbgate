@@ -15,12 +15,10 @@ jest.mock('../utility/hasPermission', () => ({ hasPermission: jest.fn(), loadPer
 jest.mock('../utility/socket', () => ({ emit: jest.fn(), emitChanged: jest.fn() }));
 jest.mock('../controllers/connections', () => ({}));
 jest.mock('../auth/authProvider', () => ({ getAuthProviderFromReq: jest.fn() }));
-jest.mock('../utility/checkLicense', () => ({ checkLicense: jest.fn(), checkLicenseKey: jest.fn() }));
-jest.mock('./storage', () => ({ readConfig: jest.fn(), writeConfig: jest.fn() }));
+
+jest.mock('./storage', () => ({ readConfig: jest.fn(), writeConfig: jest.fn(), getStorageConnectionError: () => null }));
 jest.mock('../shell', () => ({}));
-jest.mock('../utility/authProxy', () => ({ getAuthProxyUrl: jest.fn(), tryToGetRefreshedLicense: jest.fn() }));
-jest.mock('../utility/hardwareFingerprint', () => ({ getPublicHardwareFingerprint: jest.fn() }));
-jest.mock('../utility/usageAnalyticsPolicy', () => ({ getUsageAnalyticsEnvironmentPolicy: jest.fn() }));
+
 jest.mock('../utility/crypting', () => ({}));
 
 const { hasPermission } = require('../utility/hasPermission');
@@ -68,5 +66,25 @@ describe('config.updateSettings', () => {
 
     expect(res).toBeTruthy();
     expect(readSavedSettings()['externalTools.pg_dump']).toBe('/usr/bin/pg_dump');
+  });
+});
+
+describe('local configuration', () => {
+  test('returns usable local configuration without an account or a license', async () => {
+    const { getAuthProviderFromReq } = require('../auth/authProvider');
+    getAuthProviderFromReq.mockReturnValue({
+      getCurrentLogin: () => null,
+      getCurrentPermissions: async () => [],
+      isUserLoggedIn: () => true,
+      getSingleConnectionId: () => null,
+      getLogoutUrl: async () => null,
+    });
+    const result = await config.get({}, req);
+    expect(result.isUserLoggedIn).toBe(true);
+    expect(result.version).toEqual(expect.any(String));
+    expect(result.configurationError).toBeNull();
+    for (const key of ['checkedLicense', 'isLicenseValid', 'trialDaysLeft', 'allowPrivateCloud', 'usageAnalyticsConsentOverride']) {
+      expect(result).not.toHaveProperty(key);
+    }
   });
 });

@@ -3,7 +3,7 @@ import moment from 'moment';
 import { ScriptWriterGeneric, ScriptWriterJavaScript, ScriptWriterJson } from 'dbgate-tools';
 import getAsArray from '../utility/getAsArray';
 import { getConnectionInfo } from '../utility/metadataLoaders';
-import { findEngineDriver, findObjectLike } from 'dbgate-tools';
+import { findEngineDriver } from 'dbgate-tools';
 import { findFileFormat } from '../plugins/fileformats';
 import { getCurrentConfig, getExtensions } from '../stores';
 import { getVolatileRemapping } from '../utility/api';

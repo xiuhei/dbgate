@@ -1,6 +1,5 @@
 <script lang="ts">
   import {
-    ChangePerspectiveConfigFunc,
     createPerspectiveNodeConfig,
     getPerspectiveParentColumnName,
     PerspectiveDataPatternColumn,

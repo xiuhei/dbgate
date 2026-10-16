@@ -2,8 +2,7 @@
   import _ from 'lodash';
   import { loadingPluginStore } from '../stores';
   import { apiCall } from '../utility/api';
-  import { isProApp } from '../utility/proTools';
-  import { openApiDriver, oDataDriver, graphQlDriver } from 'dbgate-rest';
+
   import { buildFileFormats, buildQuickExports } from './fileformats';
   import { __t } from '../translations';
   async function loadPlugins(pluginsDict, installedPlugins) {
@@ -43,23 +42,19 @@
   }
 
   function buildDrivers(plugins) {
-    const res = isProApp() ? [openApiDriver, oDataDriver, graphQlDriver] : [];
+    const res = [];
     for (const { content } of plugins) {
       if (content.drivers) res.push(...content.drivers);
     }
     return res;
   }
 
-  function filterByEdition(arr) {
-    return arr.filter(x => !x.premiumOnly || isProApp());
-  }
-
   export function buildExtensions(plugins) {
     const extensions = {
       plugins,
-      fileFormats: filterByEdition(buildFileFormats(plugins)),
-      drivers: filterByEdition(buildDrivers(plugins)),
-      quickExports: filterByEdition(buildQuickExports(plugins)),
+      fileFormats: buildFileFormats(plugins),
+      drivers: buildDrivers(plugins),
+      quickExports: buildQuickExports(plugins),
     };
     return extensions;
   }

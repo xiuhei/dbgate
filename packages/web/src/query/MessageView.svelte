@@ -15,7 +15,7 @@
   export let showCaller = false;
   export let startLine = 0;
   export let onMessageClick = null;
-  export let onExplainError = null;
+
   export let engine = null;
 
   export let filter = '';
@@ -174,7 +174,6 @@
           {startLine}
           previousRow={index > 0 ? filteredItems[index - 1] : null}
           {onMessageClick}
-          {onExplainError}
           {engine}
         />
       {/each}

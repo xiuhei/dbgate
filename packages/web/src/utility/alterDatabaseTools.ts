@@ -5,7 +5,7 @@ import { showModal } from '../modals/modalTools';
 import { getExtensions } from '../stores';
 import { getConnectionInfo, getDatabaseInfo } from './metadataLoaders';
 import ConfirmSqlModal, { saveScriptToDatabase } from '../modals/ConfirmSqlModal.svelte';
-import { apiCall } from './api';
+
 import { _t } from '../translations';
 
 export async function alterDatabaseDialog(conid, database, updateFunc) {

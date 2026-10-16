@@ -1,26 +1,24 @@
 const fs = require('fs-extra');
 const os = require('os');
 const path = require('path');
-const axios = require('axios');
+
 const { datadir, getLogsFilePath } = require('../utility/directories');
 const { hasPermission, loadPermissionsFromRequest } = require('../utility/hasPermission');
 const socket = require('../utility/socket');
 const _ = require('lodash');
 const AsyncLock = require('async-lock');
-const jwt = require('jsonwebtoken');
 
 const processArgs = require('../utility/processArgs');
 const currentVersion = require('../currentVersion');
 const platformInfo = require('../utility/platformInfo');
 const connections = require('../controllers/connections');
 const { getAuthProviderFromReq } = require('../auth/authProvider');
-const { checkLicense, checkLicenseKey } = require('../utility/checkLicense');
+
 const storage = require('./storage');
 const dbgateApi = require('../shell');
-const { getAuthProxyUrl, tryToGetRefreshedLicense } = require('../utility/authProxy');
-const { getPublicHardwareFingerprint } = require('../utility/hardwareFingerprint');
+
 const { extractErrorMessage } = require('dbgate-tools');
-const { getUsageAnalyticsEnvironmentPolicy } = require('../utility/usageAnalyticsPolicy');
+
 const {
   generateTransportEncryptionKey,
   createTransportEncryptor,
@@ -77,13 +75,9 @@ module.exports = {
       configurationError = extractErrorMessage(storageConnectionError);
     }
 
-    const checkedLicense = storageConnectionError ? null : await checkLicense();
-    const isLicenseValid = checkedLicense?.status == 'ok';
     const logoutUrl = storageConnectionError ? null : await authProvider.getLogoutUrl();
     const adminConfig = storageConnectionError ? null : await storage.readConfig({ group: 'admin' });
     const settingsConfig = storageConnectionError ? null : await storage.readConfig({ group: 'settings' });
-
-    storage.startRefreshLicense();
 
     const isAdminPasswordMissing = !!(
       process.env.STORAGE_DATABASE &&
@@ -107,11 +101,7 @@ module.exports = {
       allowShellScripting: platformInfo.allowShellScripting,
       isDocker: platformInfo.isDocker,
       isElectron: platformInfo.isElectron,
-      isLicenseValid,
-      isLicenseExpired: checkedLicense?.isExpired,
-      trialDaysLeft:
-        checkedLicense?.licenseTypeObj?.isTrial && !checkedLicense?.isExpired ? checkedLicense?.daysLeft : null,
-      checkedLicense,
+
       configurationError,
       logoutUrl,
       permissions,
@@ -128,16 +118,15 @@ module.exports = {
       skipAllAuth: !!process.env.SKIP_ALL_AUTH,
       adminPasswordState: adminConfig?.adminPasswordState,
       storageDatabase: process.env.STORAGE_DATABASE,
-      usageAnalyticsConsentOverride: getUsageAnalyticsEnvironmentPolicy(),
+
       logsFilePath: getLogsFilePath(),
       connectionsFilePath: path.join(
         datadir(),
         processArgs.runE2eTests ? 'connections-e2etests.jsonl' : 'connections.jsonl'
       ),
-      supportCloudAutoUpgrade: !!process.env.CLOUD_UPGRADE_FILE,
-      allowPrivateCloud: platformInfo.isElectron || !!process.env.ALLOW_DBGATE_PRIVATE_CLOUD,
+
       ...currentVersion,
-      redirectToDbGateCloudLogin: !!process.env.REDIRECT_TO_DBGATE_CLOUD_LOGIN,
+
       preferrendLanguage: settingsConfig?.['storage.language'] || process.env.LANGUAGE || null,
     };
 
@@ -213,93 +202,12 @@ module.exports = {
         );
         return {
           ...this.fillMissingSettings(JSON.parse(settingsText)),
-          'other.licenseKey': platformInfo.isElectron ? await this.loadLicenseKey() : undefined,
-          // 'other.licenseKey': await this.loadLicenseKey(),
+
         };
       }
     } catch (err) {
       return {
         ...this.fillMissingSettings({}),
-        // An unavailable Team policy must not fall back to individual analytics consent.
-        ...(process.env.STORAGE_DATABASE ? { 'storage.usageAnalytics': 'disabled' } : {}),
-      };
-    }
-  },
-
-  async loadLicenseKey() {
-    try {
-      const licenseKey = await fs.readFile(path.join(datadir(), 'license.key'), { encoding: 'utf-8' });
-      return licenseKey;
-    } catch (err) {
-      return null;
-    }
-  },
-
-  saveLicenseKey_meta: true,
-  async saveLicenseKey({ licenseKey, forceSave = false, tryToRenew = false }) {
-    if (!forceSave) {
-      const decoded = jwt.decode(licenseKey?.trim());
-      if (!decoded) {
-        return {
-          status: 'error',
-          errorMessage: 'Invalid license key',
-        };
-      }
-
-      const { exp } = decoded;
-      if (exp * 1000 < Date.now()) {
-        let renewed = false;
-        if (tryToRenew) {
-          const newLicenseKey = await tryToGetRefreshedLicense(licenseKey);
-          if (newLicenseKey.status == 'ok') {
-            licenseKey = newLicenseKey.token;
-            renewed = true;
-          }
-        }
-
-        if (!renewed) {
-          return {
-            status: 'error',
-            errorMessage: 'License key is expired',
-          };
-        }
-      }
-    }
-
-    try {
-      if (process.env.STORAGE_DATABASE) {
-        await storage.writeConfig({ group: 'license', config: { licenseKey } });
-        // await storageWriteConfig('license', { licenseKey });
-      } else {
-        await fs.writeFile(path.join(datadir(), 'license.key'), licenseKey);
-      }
-      socket.emitChanged(`config-changed`);
-      return { status: 'ok' };
-    } catch (err) {
-      return {
-        status: 'error',
-        errorMessage: err.message,
-      };
-    }
-  },
-
-  startTrial_meta: true,
-  async startTrial() {
-    try {
-      const fingerprint = await getPublicHardwareFingerprint();
-
-      const resp = await axios.default.post(`https://api.dbgate.cloud/trial-license`, {
-        type: 'premium-trial',
-        days: 30,
-        fingerprint,
-      });
-      const { token } = resp.data;
-
-      return await this.saveLicenseKey({ licenseKey: token });
-    } catch (err) {
-      return {
-        status: 'error',
-        errorMessage: err.message,
       };
     }
   },
@@ -308,10 +216,7 @@ module.exports = {
   async updateSettings(values, req) {
     const loadedPermissions = await loadPermissionsFromRequest(req);
     if (!hasPermission(`settings/change`, loadedPermissions)) return false;
-    if (Object.prototype.hasOwnProperty.call(values, 'storage.usageAnalytics')) {
-      if (!hasPermission('admin/settings', loadedPermissions)) return false;
-      if (!['user', 'enabled', 'disabled'].includes(values['storage.usageAnalytics'])) return false;
-    }
+
     // External tools are the executables that native backup and restore start on the server
     if (Object.keys(values ?? {}).some(key => key.startsWith('externalTools.'))) {
       if (!hasPermission('admin/settings', loadedPermissions)) return false;
@@ -333,7 +238,7 @@ module.exports = {
         } else {
           updated = {
             ...currentValue,
-            ..._.omit(values, ['other.licenseKey']),
+            ...values,
           };
           await fs.writeFile(
             path.join(datadir(), processArgs.runE2eTests ? 'settings-e2etests.json' : 'settings.json'),
@@ -341,10 +246,6 @@ module.exports = {
           );
           // this.settingsValue = updated;
 
-          if (currentValue['other.licenseKey'] != values['other.licenseKey']) {
-            await this.saveLicenseKey({ licenseKey: values['other.licenseKey'], forceSave: true });
-            socket.emitChanged(`config-changed`);
-          }
         }
 
         socket.emitChanged(`settings-changed`);
@@ -353,32 +254,6 @@ module.exports = {
         return false;
       }
     });
-    return res;
-  },
-
-  changelog_meta: true,
-  async changelog() {
-    try {
-      const resp = await axios.default.get('https://raw.githubusercontent.com/dbgate/dbgate/master/CHANGELOG.md');
-      return resp.data;
-    } catch (err) {
-      return '';
-    }
-  },
-
-  checkLicense_meta: true,
-  async checkLicense({ licenseKey }) {
-    const resp = await checkLicenseKey(licenseKey);
-    return resp;
-  },
-
-  getNewLicense_meta: true,
-  async getNewLicense({ oldLicenseKey }) {
-    const newLicenseKey = await tryToGetRefreshedLicense(oldLicenseKey);
-    const res = await checkLicenseKey(newLicenseKey.token);
-    if (res.status == 'ok') {
-      res.licenseKey = newLicenseKey.token;
-    }
     return res;
   },
 
@@ -458,15 +333,7 @@ module.exports = {
 
     const recryptedDb = this.recryptDatabaseFromImport(db);
     if (process.env.STORAGE_DATABASE) {
-      // Match conservatively for storage databases with case-insensitive collations.
-      const importsUsageAnalytics = recryptedDb.config?.some(
-        row =>
-          String(row.group).trim().toLowerCase() === 'settings' &&
-          String(row.key).trim().toLowerCase() === 'storage.usageanalytics'
-      );
-      if (importsUsageAnalytics && !hasPermission('admin/settings', loadedPermissions)) {
-        throw new Error('DBGM-00000 Permission denied: admin/settings');
-      }
+
       await storage.replicateImportedDatabase(recryptedDb);
     } else {
       await connections.importFromArray(

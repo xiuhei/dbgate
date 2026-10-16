@@ -2,7 +2,7 @@
   import { openWebLink } from '../utility/simpleTools';
 
   export let text: string;
-  export let colorClass: string = 'premium-gradient';
+  export let colorClass: string = '';
   export let link: string;
 </script>
 

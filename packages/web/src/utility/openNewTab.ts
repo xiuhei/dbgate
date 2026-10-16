@@ -8,7 +8,6 @@ import stableStringify from 'json-stable-stringify';
 import { saveAllPendingEditorData } from '../query/useEditorData';
 import { getConnectionInfo } from './metadataLoaders';
 import { getBoolSettingsValue } from '../settings/settingsTools';
-import { getUsageTabName, trackUsage } from './usageAnalytics';
 
 function findFreeNumber(numbers: number[]) {
   if (numbers.length == 0) return 1;
@@ -31,7 +30,7 @@ export default async function openNewTab(newTab, initialData: any = undefined, o
     };
   }
 
-  const { savedFile, savedFolder, savedFilePath, savedCloudFolderId, savedCloudContentId, conid, database } =
+  const { savedFile, savedFolder, savedFilePath, conid, database } =
     newTab.props || {};
 
   if (conid && database) {
@@ -51,9 +50,7 @@ export default async function openNewTab(newTab, initialData: any = undefined, o
         x.closedTime == null &&
         x.props.savedFile == savedFile &&
         x.props.savedFolder == savedFolder &&
-        x.props.savedFilePath == savedFilePath &&
-        x.props.savedCloudFolderId == savedCloudFolderId &&
-        x.props.savedCloudContentId == savedCloudContentId
+        x.props.savedFilePath == savedFilePath
     );
   }
 
@@ -140,22 +137,6 @@ export default async function openNewTab(newTab, initialData: any = undefined, o
       },
     ];
   });
-
-  if (newTab.tabComponent) {
-    void (async () => {
-      let engine: string | undefined;
-      if (newTab.props?.conid) {
-        try {
-          engine = (await getConnectionInfo({ conid: newTab.props.conid }))?.engine;
-        } catch {
-          // Opening the tab and analytics must not depend on metadata loading.
-        }
-      }
-      const openedTab = getUsageTabName(newTab);
-      // tab is the opened tab, so that events can be grouped by tab.
-      trackUsage({ feature: openedTab, action: 'open', tab: openedTab, engine });
-    })();
-  }
 
   // console.log('OPENING NEW TAB', newTab);
   // const tabid = uuidv1();

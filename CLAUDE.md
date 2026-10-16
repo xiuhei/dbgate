@@ -71,7 +71,6 @@ cd e2e-tests && yarn cy:run:browse-data   # run a specific spec headlessly
 | `packages/filterparser` | `dbgate-filterparser` | Parses filter strings into SQL/Mongo conditions |
 | `packages/rest` | `dbgate-rest` | REST connection support |
 | `packages/types` | `dbgate-types` | TypeScript type definitions (`.d.ts` only) |
-| `packages/aigwmock` | `dbgate-aigwmock` | Mock AI gateway server for E2E testing |
 | `plugins/dbgate-plugin-*` | — | Database drivers and file format handlers |
 | `app/` | — | Electron shell |
 | `integration-tests/` | — | Jest-based DB integration tests (Docker) |
@@ -117,6 +116,3 @@ yarn translations:extract        # extract new strings
 yarn translations:add-missing    # add missing translations
 yarn translations:check          # check for issues
 ```
-
-## Repository layout
-This repository is for DbGate Community. DbGate Premium is ../dbgate-merged directory. The ../dbgate-pro directory contains difference between ../dbgate-merged and this repo. More precisely, ../dbgate-merged is a merge of this repo, with overwritten paths from ../dbgate-pro. The ../dbgate-pro directory contains only files that are different from this repo 9and files which are not existing in this repo and are specific for DbGate Premium.

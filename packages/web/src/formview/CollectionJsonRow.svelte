@@ -26,7 +26,7 @@
 <script lang="ts">
   import JSONTree from '../jsontree/JSONTree.svelte';
   import { copyTextToClipboard } from '../utility/clipboard';
-  import { getContextMenu, registerMenu } from '../utility/contextMenu';
+  import { registerMenu } from '../utility/contextMenu';
   export let rowIndex;
   export let grider;
 

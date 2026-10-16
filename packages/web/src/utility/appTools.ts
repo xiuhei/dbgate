@@ -1,7 +1,7 @@
-import type { ApplicationDefinition, DatabaseInfo, StoredConnection } from 'dbgate-types';
+import type { ApplicationDefinition, DatabaseInfo } from 'dbgate-types';
 import { apiCall } from '../utility/api';
 import _ from 'lodash';
-import { match } from 'fuzzy';
+
 import { getConnectionInfo } from './metadataLoaders';
 import openNewTab from './openNewTab';
 

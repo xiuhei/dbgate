@@ -1,9 +1,9 @@
 import _ from 'lodash';
-import { currentDatabase, getCurrentDatabase, getExtensions } from '../stores';
+import { getCurrentDatabase, getExtensions } from '../stores';
 import getElectron from '../utility/getElectron';
 import registerCommand from './registerCommand';
-import { apiCall } from '../utility/api';
-import { getDatabasStatusMenu, switchCurrentDatabase } from '../utility/common';
+
+import { getDatabasStatusMenu } from '../utility/common';
 import { __t } from '../translations';
 import { findEngineDriver } from 'dbgate-tools';
 

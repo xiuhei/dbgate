@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
   import { copyTextToClipboard } from '../utility/clipboard';
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import { _t, _tval, type DefferedTranslationResult } from '../translations';
   import sqlFormatter from 'sql-formatter';
 
@@ -118,17 +118,7 @@
           {
             divider: true,
           },
-          isProApp() && {
-            label: _t('dbObject.designQuery', { defaultMessage: 'Design query' }),
-            isQueryDesigner: true,
-            requiresWriteAccess: true,
-          },
-          isProApp() && {
-            label: _t('dbObject.designPerspectiveQuery', { defaultMessage: 'Design perspective query' }),
-            tab: 'PerspectiveTab',
-            forceNewTab: true,
-            icon: 'img perspective',
-          },
+
           createScriptTemplatesSubmenu('tables'),
           {
             label: _t('dbObject.sqlGenerator', { defaultMessage: 'SQL generator' }),
@@ -216,16 +206,7 @@
           {
             divider: true,
           },
-          isProApp() && {
-            label: _t('dbObject.designQuery', { defaultMessage: 'Design query' }),
-            isQueryDesigner: true,
-          },
-          isProApp() && {
-            label: _t('dbObject.designPerspectiveQuery', { defaultMessage: 'Design perspective query' }),
-            tab: 'PerspectiveTab',
-            forceNewTab: true,
-            icon: 'img perspective',
-          },
+
           createScriptTemplatesSubmenu('views'),
           {
             label: _t('dbObject.sqlGenerator', { defaultMessage: 'SQL generator' }),
@@ -396,12 +377,7 @@
           {
             divider: true,
           },
-          isProApp() && {
-            label: _t('dbObject.designPerspectiveQuery', { defaultMessage: 'Design perspective query' }),
-            tab: 'PerspectiveTab',
-            forceNewTab: true,
-            icon: 'img perspective',
-          },
+
           hasPermission('dbops/export') && {
             label: _t('common.export', { defaultMessage: 'Export' }),
             isExport: true,
@@ -477,32 +453,8 @@
     }
   }
 
-  /** Stable analytics name of a database object menu item. */
-  function getMenuUsageAction(menu): string {
-    if (menu.isQueryDesigner) return 'design_query';
-    if (menu.isDiagram) return 'show_diagram';
-    if (menu.sqlGeneratorProps) return 'sql_generator';
-    if (menu.isDrop || menu.isDropCollection) return 'drop';
-    if (menu.isDisableEvent) return 'disable_event';
-    if (menu.isEnableEvent) return 'enable_event';
-    if (menu.isTruncate) return 'truncate';
-    if (menu.isRename || menu.isRenameCollection) return 'rename';
-    if (menu.isCopyTableName) return 'copy_name';
-    if (menu.isDuplicateCollection) return 'duplicate';
-    if (menu.isTableBackup) return 'backup';
-    if (menu.isTableRestore) return 'restore';
-    if (menu.isImport) return 'import';
-    if (menu.scriptTemplate) return 'script_template';
-    return 'open';
-  }
-
   async function databaseObjectMenuClickHandler(data, menu) {
-    trackUsage({
-      feature: 'object_tree',
-      action: getMenuUsageAction(menu),
-      engine: data?.engine,
-      param: data?.objectTypeField,
-    });
+
     const getDriver = async () => {
       const conn = await getConnectionInfo(data);
       if (!conn) return;
@@ -1103,7 +1055,7 @@
   import { defaultDatabaseObjectAppObjectActions, matchDatabaseObjectAppObject } from './appObjectTools';
   import { getSupportedScriptTemplates } from '../utility/applyScriptTemplate';
   import { getBoolSettingsValue, getOpenDetailOnArrowsSettings } from '../settings/settingsTools';
-  import { isProApp } from '../utility/proTools';
+
   import formatFileSize from '../utility/formatFileSize';
   import { createTableRestoreScript } from '../utility/tableRestoreScript';
   import newQuery from '../query/newQuery';

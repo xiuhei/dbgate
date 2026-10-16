@@ -3,12 +3,12 @@
   import FormSubmit from '../forms/FormSubmit.svelte';
   import FormStyledButton from '../buttons/FormStyledButton.svelte';
   import ModalBase from './ModalBase.svelte';
-  import { closeCurrentModal, showModal } from './modalTools';
+  import { closeCurrentModal } from './modalTools';
   import DefineDictionaryDescriptionModal from './DefineDictionaryDescriptionModal.svelte';
   import ScrollableTableControl from '../elements/ScrollableTableControl.svelte';
-  import { getDictionaryDescription } from '../utility/dictionaryDescriptionTools';
+
   import { onMount } from 'svelte';
-  import { dumpSqlSelect } from 'dbgate-sqltree';
+
   import LoadingInfo from '../elements/LoadingInfo.svelte';
   import SearchInput from '../elements/SearchInput.svelte';
   import FormTextField from '../forms/FormTextField.svelte';

@@ -214,7 +214,7 @@ const legacyMongoDriver = {
   ...mongoDriverBase,
   engine: 'mongo-legacy@dbgate-plugin-mongo',
   title: 'MongoDB 4 - Legacy',
-  premiumOnly: true,
+
   useLegacyDriver: true,
 };
 

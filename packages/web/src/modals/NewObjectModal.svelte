@@ -4,7 +4,7 @@
   import newQuery from '../query/newQuery';
   import { commandsCustomized, selectedWidget } from '../stores';
   import hasPermission from '../utility/hasPermission';
-  import { isProApp } from '../utility/proTools';
+
   import ModalBase from './ModalBase.svelte';
   import { closeCurrentModal } from './modalTools';
   import { _t } from '../translations';
@@ -35,32 +35,7 @@
         defaultMessage: 'You are not allowed to create new connections',
       }),
     },
-    {
-      icon: 'icon cloud-connection',
-      colorClass: 'color-icon-blue',
-      title: _t('common.connectionOnCloud', { defaultMessage: 'Connection on Cloud' }),
-      description: _t('newObject.connectionOnCloudDescription', {
-        defaultMessage: 'Database connection stored on DbGate Cloud',
-      }),
-      command: 'new.connectionOnCloud',
-      changeWidget: 'cloud-private',
-      testid: 'NewObjectModal_connectionOnCloud',
-      disabledMessage: _t('newObject.connectionOnCloudDisabled', {
-        defaultMessage: 'For creating connections on DbGate Cloud, you need to be logged in',
-      }),
-    },
-    {
-      icon: 'icon query-design',
-      colorClass: 'color-icon-red',
-      title: _t('common.queryDesigner', { defaultMessage: 'Query Designer' }),
-      description: _t('newObject.queryDesignerDescription', { defaultMessage: 'Design SQL queries visually' }),
-      command: 'new.queryDesign',
-      testid: 'NewObjectModal_queryDesign',
-      disabledMessage: _t('newObject.queryDesignerDisabled', {
-        defaultMessage: 'Query Designer is not available for current database',
-      }),
-      isProFeature: true,
-    },
+
     {
       icon: 'icon diagram',
       colorClass: 'color-icon-blue',
@@ -72,17 +47,7 @@
         defaultMessage: 'ER Diagram is not available for current database',
       }),
     },
-    {
-      icon: 'icon perspective',
-      colorClass: 'color-icon-yellow',
-      title: _t('common.perspective', { defaultMessage: 'Perspective' }),
-      description: _t('newObject.perspectiveDescription', {
-        defaultMessage: 'Join complex data from multiple databases',
-      }),
-      command: 'new.perspective',
-      testid: 'NewObjectModal_perspective',
-      isProFeature: true,
-    },
+
     {
       icon: 'icon table',
       colorClass: 'color-icon-blue',
@@ -120,56 +85,7 @@
         defaultMessage: 'Export is not available for current database',
       }),
     },
-    {
-      icon: 'icon compare',
-      colorClass: 'color-icon-red',
-      title: _t('common.compareDatabase', { defaultMessage: 'Compare database' }),
-      description: _t('newObject.compareDescription', { defaultMessage: 'Compare database schemas' }),
-      command: 'database.compare',
-      testid: 'NewObjectModal_databaseCompare',
-      disabledMessage: _t('newObject.compareDisabled', {
-        defaultMessage: 'Database comparison is not available for current database',
-      }),
-      isProFeature: true,
-    },
-    {
-      icon: 'icon ai',
-      colorClass: 'color-icon-blue',
-      title: _t('common.databaseChat', { defaultMessage: 'Database Chat' }),
-      description: _t('newObject.databaseChatDescription', { defaultMessage: 'Chat with your database using AI' }),
-      command: 'database.chat',
-      isProFeature: true,
-      disabledMessage: _t('newObject.databaseChatDisabled', {
-        defaultMessage: 'Database chat is not available for current database',
-      }),
-      testid: 'NewObjectModal_databaseChat',
-    },
-    {
-      icon: 'icon ai',
-      colorClass: 'color-icon-blue',
-      title: _t('common.graphqlChat', { defaultMessage: 'GraphQL Chat' }),
-      description: _t('newObject.graphqlChatDescription', { defaultMessage: 'Chat with your GraphQL API using AI' }),
-      command: 'graphql.chat',
-      isProFeature: true,
-      disabledMessage: _t('newObject.graphqlChatDisabled', {
-        defaultMessage: 'GraphQL chat is not available for current connection',
-      }),
-      testid: 'NewObjectModal_graphqlChat',
-    },
-    {
-      icon: 'icon graphql',
-      colorClass: 'color-icon-magenta',
-      title: _t('common.graphqlQuery', { defaultMessage: 'GraphQL Query' }),
-      description: _t('newObject.graphqlQueryDescription', {
-        defaultMessage: 'Write queries, choose attributes and arguments',
-      }),
-      isProFeature: true,
-      disabledMessage: _t('newObject.graphqlQueryDisabled', {
-        defaultMessage: 'GraphQL Query is not available for current database',
-      }),
-      testid: 'NewObjectModal_graphqlQuery',
-      command: 'new.graphqlQuery',
-    }
+
   ];
 </script>
 
@@ -190,7 +106,6 @@
         colorClass={item.colorClass}
         data-testid={item.testid}
         disabledMessage={item.disabledMessage}
-        isProFeature={item.isProFeature}
         on:click={() => {
           if (!enabled) return;
           closeCurrentModal();

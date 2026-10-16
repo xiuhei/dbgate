@@ -3,7 +3,7 @@
 
   import FormStyledButton from '../buttons/FormStyledButton.svelte';
 
-  import { useArchiveFiles, useArchiveFolders } from '../utility/metadataLoaders';
+  import { useArchiveFiles } from '../utility/metadataLoaders';
   import { getFormContext } from './FormProviderCore.svelte';
 
   import FormSelectField from './FormSelectField.svelte';

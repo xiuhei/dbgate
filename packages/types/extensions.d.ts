@@ -27,7 +27,6 @@ export interface ThemeDefinition {
   themeType: 'light' | 'dark';
   isBuiltInTheme?: boolean;
   themeVariables?: { [key: string]: string };
-  themePublicCloudPath?: string;
   editorTheme?: string;
 }
 

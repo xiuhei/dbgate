@@ -169,7 +169,7 @@
 <script lang="ts">
   import { getFilterValueExpression } from 'dbgate-filterparser';
 
-  import { filterName, shouldOpenMultilineDialog, stringifyCellValue } from 'dbgate-tools';
+  import { filterName, shouldOpenMultilineDialog } from 'dbgate-tools';
 
   import _ from 'lodash';
 

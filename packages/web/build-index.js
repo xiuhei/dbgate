@@ -9,8 +9,6 @@ for (const page of [
   'login',
   'admin-login',
   'admin',
-  'license',
-  'admin-license',
   'set-admin-password',
   'redirect',
   'forgot-password',

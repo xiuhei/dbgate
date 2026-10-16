@@ -484,7 +484,7 @@ const mysqlDriver = {
   nodejsBackupTool: 'dbgate-mysql-dumper',
   nodejsRestoreTool: 'dbgate-mysql-dumper',
   supportsServerSummary: true,
-  supportsServerSqlChat: true,
+
   dialect: mysqlDialect,
   engine: 'mysql@dbgate-plugin-mysql',
   title: 'MySQL',
@@ -533,7 +533,7 @@ const mariaDriver = {
   nativeBackupTool: 'mariadb-dump',
   nativeRestoreTool: 'mariadb',
   supportsServerSummary: true,
-  supportsServerSqlChat: true,
+
   dialect: mariaDbDialect,
   engine: 'mariadb@dbgate-plugin-mysql',
   title: 'MariaDB',

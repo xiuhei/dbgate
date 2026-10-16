@@ -1,5 +1,5 @@
 <script lang="ts" context="module">
-  import { getLockedDatabaseMode, getCurrentDatabase, getOpenedTabs, openedTabs, getActiveTabId, cloudConnectionsStore, getOpenedModals, getActiveTab } from '../stores';
+  import { getLockedDatabaseMode, getCurrentDatabase, getOpenedTabs, openedTabs, getActiveTabId, getOpenedModals, getActiveTab } from '../stores';
   import { showModal } from '../modals/modalTools';
   import CloseTabModal from '../modals/CloseTabModal.svelte';
   import _ from 'lodash';
@@ -197,7 +197,7 @@
     );
   };
 
-  function getTabDbName(tab, connectionList, cloudConnectionsStore) {
+  function getTabDbName(tab, connectionList) {
     if (tab.tabComponent == 'ConnectionTab') return _t('common.connections', { defaultMessage: 'Connections' });
     if (tab.tabComponent?.startsWith('Admin')) return _t('tab.administration', { defaultMessage: 'Administration' });
     if (tab.props && tab.props.conid && tab.props.database && tab.props.database != '_api_database_') {
@@ -205,7 +205,7 @@
     }
     if (tab.props && tab.props.conid) {
       const connection =
-        connectionList?.find(x => x._id == tab.props.conid) ?? cloudConnectionsStore?.[tab.props.conid];
+        connectionList?.find(x => x._id == tab.props.conid) ;
       if (connection) return getConnectionLabel(connection, { allowExplicitDatabase: false });
       return '???';
     }
@@ -213,10 +213,10 @@
     return '(no DB)';
   }
 
-  function getTabDbServer(tab, connectionList, cloudConnectionsStore) {
+  function getTabDbServer(tab, connectionList) {
     if (tab.props && tab.props.conid && tab.props.database && tab.props.database != '_api_database_') {
       const connection =
-        connectionList?.find(x => x._id == tab.props.conid) ?? cloudConnectionsStore?.[tab.props.conid];
+        connectionList?.find(x => x._id == tab.props.conid) ;
       if (connection) return getConnectionLabel(connection, { allowExplicitDatabase: false });
       return null;
     }
@@ -344,10 +344,9 @@
   import TabCloseButton from '../elements/TabCloseButton.svelte';
   import SwitchDatabaseModal from '../modals/SwitchDatabaseModal.svelte';
   import { handleAfterTabClick } from '../utility/changeCurrentDbByTab';
-  import { getBoolSettingsValue } from '../settings/settingsTools';
+
   import NewObjectModal from '../modals/NewObjectModal.svelte';
-  import { isProApp } from '../utility/proTools';
-  import { openWebLink } from '../utility/simpleTools';
+
   export let multiTabIndex;
   export let shownTab;
 
@@ -366,9 +365,9 @@
 
   $: tabsWithDb = $openedTabs.filter(showTabFilterFunc).map(tab => ({
     ...tab,
-    tabDbName: getTabDbName(tab, $connectionList, $cloudConnectionsStore),
+    tabDbName: getTabDbName(tab, $connectionList),
     tabDbKey: getTabDbKey(tab),
-    tabDbServer: getTabDbServer(tab, $connectionList, $cloudConnectionsStore),
+    tabDbServer: getTabDbServer(tab, $connectionList),
   }));
 
   $: groupedTabs = groupTabs(tabsWithDb);
@@ -590,8 +589,7 @@
 <div class="root">
   <div
     class="tabs"
-    class:can-split={allowSplitTab && isProApp()}
-    class:tabs-upgrade-button={!isProApp()}
+    class:can-split={allowSplitTab && true}
     on:wheel={handleTabsWheel}
     bind:this={domTabs}
   >
@@ -719,7 +717,7 @@
     {/each}
   </div>
   <div class="icons-wrapper">
-    {#if allowSplitTab && isProApp()}
+    {#if allowSplitTab}
       <div
         class="icon-button"
         on:click={() => splitTab(multiTabIndex)}
@@ -727,21 +725,6 @@
         data-testid="TabsPanel_buttonSplit"
       >
         <FontIcon icon="icon split" />
-      </div>
-    {/if}
-
-    {#if !isProApp()}
-      <div
-        class="upgrade-button"
-        on:click={() => {
-          openWebLink(
-            `https://www.dbgate.io/purchase/${isElectronAvailable() ? 'premium' : 'team-premium'}/?utm_campaign=premiumUpgradeButton`
-          );
-        }}
-        title="Upgrade to Premium"
-        data-testid="TabsPanel_buttonUpgrade"
-      >
-        <FontIcon icon="icon premium" /> Upgrade
       </div>
     {/if}
 
@@ -779,21 +762,7 @@
     color: var(--theme-tabs-panel-foreground);
     cursor: pointer;
   }
-  .upgrade-button {
-    background: linear-gradient(135deg, #1686c8, #8a25b1);
-    border: 1px solid color-mix(in rgb, #1686c8 50%, #8a25b1 50%);
-    border-radius: 10px;
-    color: white;
-    cursor: pointer;
-    font-size: 10pt;
-    padding: 5px;
-    margin-top: 3px;
-    margin-right: 3px;
-    font-size: 8pt;
-  }
-  .upgrade-button:hover {
-    background: linear-gradient(135deg, #0f5a85, #5c1870);
-  }
+
   .icon-button:hover {
     color: var(--theme-tabs-panel-active-foreground);
   }
@@ -808,9 +777,6 @@
     bottom: 0;
   }
 
-  .tabs-upgrade-button {
-    right: 110px;
-  }
   .tabs.can-split {
     right: 60px;
   }

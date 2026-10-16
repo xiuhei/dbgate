@@ -2,7 +2,7 @@
   import { onMount } from 'svelte';
   import { openWebLink } from '../utility/simpleTools';
 
-  export let colorClass: string = 'premium-gradient';
+  export let colorClass: string = '';
   export let validTo;
   export let link;
 

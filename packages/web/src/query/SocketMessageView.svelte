@@ -19,7 +19,7 @@
   export let startLine = 0;
   export let onChangeErrors = null;
   export let onMessageClick = null;
-  export let onExplainError = null;
+
   export let engine = null;
 
   const settings = useSettings();
@@ -112,7 +112,6 @@
     {showLine}
     {showCaller}
     {startLine}
-    {onExplainError}
     {engine}
     bind:preserveLogs
     onClear={executeNumber == null ? handleClearMessages : null}

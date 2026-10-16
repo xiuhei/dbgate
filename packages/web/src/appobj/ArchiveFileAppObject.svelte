@@ -71,8 +71,6 @@
   import { filterName } from 'dbgate-tools';
   import { showModal } from '../modals/modalTools';
 
-  import { getExtensions } from '../stores';
-
   import createQuickExportMenu from '../utility/createQuickExportMenu';
   import { exportQuickExportFile } from '../utility/exportFileTools';
   import openNewTab from '../utility/openNewTab';
@@ -81,15 +79,14 @@
   import ConfirmModal from '../modals/ConfirmModal.svelte';
   import { apiCall } from '../utility/api';
   import { openImportExportTab } from '../utility/importExportTools';
-  import { isProApp } from '../utility/proTools';
+
   import { _t } from '../translations';
-  import { trackObjectTree } from './appObjectTools';
 
   export let data;
   $: isZipped = data.folderName?.endsWith('.zip');
 
   const handleRename = () => {
-    trackObjectTree('rename', 'archive_file');
+
     showModal(InputTextModal, {
       value: data.fileName,
       label: _t('archiveFile.newFileName', { defaultMessage: 'New file name' }),
@@ -106,7 +103,7 @@
   };
 
   const handleDelete = () => {
-    trackObjectTree('delete', 'archive_file');
+
     showModal(ConfirmModal, {
       message: _t('archiveFile.deleteFileConfirm', { defaultMessage: 'Really delete file {fileName}?', values: { fileName: data.fileName } }),
       onConfirm: () => {
@@ -191,31 +188,7 @@
         ),
       data.fileType.endsWith('.sql') && { text: _t('common.openSql', { defaultMessage: 'Open SQL' }), onClick: handleOpenSqlFile },
       data.fileType.endsWith('.yaml') && { text: _t('common.openYaml', { defaultMessage: 'Open YAML' }), onClick: handleOpenYamlFile },
-      !isZipped &&
-        isProApp() &&
-        data.fileType == 'jsonl' && {
-          text: _t('common.openInProfiler', { defaultMessage: 'Open in profiler' }),
-          submenu: getExtensions()
-            .drivers.filter(eng => eng.profilerFormatterFunction)
-            .map(eng => ({
-              text: eng.title,
-              onClick: () => {
-                openNewTab({
-                  title: _t('common.profiler', { defaultMessage: 'Profiler' }),
-                  icon: 'img profiler',
-                  tabComponent: 'ProfilerTab',
-                  props: {
-                    jslidLoad: `archive://${data.folderName}/${data.fileName}`,
-                    engine: eng.engine,
-                    // profilerFormatterFunction: eng.profilerFormatterFunction,
-                    // profilerTimestampFunction: eng.profilerTimestampFunction,
-                    // profilerChartAggregateFunction: eng.profilerChartAggregateFunction,
-                    // profilerChartMeasures: eng.profilerChartMeasures,
-                  },
-                });
-              },
-            })),
-        },
+
     ];
   }
 </script>

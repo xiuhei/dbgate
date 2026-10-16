@@ -30,7 +30,7 @@
   import useEffect from '../utility/useEffect';
   import { getSqlFrontMatter } from 'dbgate-tools';
   import yaml from 'js-yaml';
-  import JslChart from '../charts/JslChart.svelte';
+
   import ToolStripButton from '../buttons/ToolStripButton.svelte';  export const activator = createActivator('QueryDataTab', true);
 
   export let sql = undefined;
@@ -101,29 +101,23 @@
   }
   $: $effect;
 
-  $: selectedChart = frontMatter?.['selected-chart'];
-  $: fixedChartDefinition = selectedChart && frontMatter ? frontMatter?.[`chart-${selectedChart}`] : null;
 </script>
 
 <ToolStripContainer>
   {#if loading}
     <LoadingInfo message="Loading data..." />
   {:else if jslid}
-    {#if fixedChartDefinition}
-      <JslChart {jslid} fixedDefinition={fixedChartDefinition} />
-    {:else}
+
       <JslDataGrid {jslid} listenInitializeFile onCustomGridRefresh={handleRefresh} focusOnVisible />
-    {/if}
+
   {/if}
   <svelte:fragment slot="toolstrip">
-    {#if fixedChartDefinition}
-      <ToolStripButton on:click={handleRefresh} icon="icon refresh">Refresh</ToolStripButton>
-    {:else}
+
       <ToolStripCommandButton command="dataGrid.refresh" />
-    {/if}
+
     <ToolStripCommandButton command="queryData.stopLoading" />
-    {#if !fixedChartDefinition}
+
       <ToolStripExportButton command="jslTableGrid.export" {quickExportHandlerRef} />
-    {/if}
+
   </svelte:fragment>
 </ToolStripContainer>

@@ -1,6 +1,6 @@
 <script lang="ts" context="module">
   import { getActiveComponent } from '../utility/createActivator';
-  import { isProApp } from '../utility/proTools';
+
   import { registerFileCommands } from '../commands/stdCommands';
   import hasPermission from '../utility/hasPermission';
   import registerCommand from '../commands/registerCommand';
@@ -18,15 +18,7 @@
     testEnabled: () => getCurrentEditor()?.isSqlEditor(),
     onClick: () => getCurrentEditor().formatCode(),
   });
-  registerCommand({
-    id: 'query.switchAiAssistant',
-    category: __t('command.query', { defaultMessage: 'Query' }),
-    name: __t('command.query.AiAssistant', { defaultMessage: 'AI Assistant' }),
-    keyText: 'Shift+Alt+A',
-    icon: 'icon ai',
-    testEnabled: () => isProApp() && !isAiDisabled(),
-    onClick: () => getCurrentEditor().toggleAiAssistant(),
-  });
+
   registerCommand({
     id: 'query.insertSqlJoin',
     category: __t('command.query', { defaultMessage: 'Query' }),
@@ -60,7 +52,7 @@
     fileExtension: 'sql',
 
     execute: true,
-    executeUsageAnalytics: false,
+
     toggleComment: true,
     findReplace: true,
     executeAdditionalCondition: () => getCurrentEditor()?.hasConnection() && hasPermission('dbops/query'),
@@ -69,7 +61,7 @@
   });
   registerCommand({
     id: 'query.executeCurrent',
-    usageAnalytics: false,
+
     category: __t('command.query', { defaultMessage: 'Query' }),
     name: __t('command.query.executeCurrent', { defaultMessage: 'Execute current' }),
     keyText: 'CtrlOrCommand+Shift+Enter',
@@ -138,7 +130,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import { getContext, onDestroy, onMount, setContext, tick } from 'svelte';
   import sqlFormatter from 'sql-formatter';
   import { writable, get } from 'svelte/store';
@@ -148,7 +140,7 @@
   import useEditorData from '../query/useEditorData';
   import { currentEditorWrapEnabled, extensions } from '../stores';
   import applyScriptTemplate from '../utility/applyScriptTemplate';
-  import { changeTab, markTabUnsaved, sleep } from '../utility/common';
+  import { changeTab, markTabUnsaved } from '../utility/common';
   import { getDatabaseInfo, useConnectionInfo, useDatabaseInfo, useSettings } from '../utility/metadataLoaders';
   import SocketMessageView from '../query/SocketMessageView.svelte';
   import useEffect from '../utility/useEffect';
@@ -177,13 +169,13 @@
   import HorizontalSplitter from '../elements/HorizontalSplitter.svelte';
   import { v1 as uuidv1 } from 'uuid';
   import ToolStripButton from '../buttons/ToolStripButton.svelte';
-  import { getIntSettingsValue, isAiDisabled } from '../settings/settingsTools';
+  import { getIntSettingsValue } from '../settings/settingsTools';
   import RowsLimitModal from '../modals/RowsLimitModal.svelte';
   import _ from 'lodash';
   import FontIcon from '../icons/FontIcon.svelte';
-  import QueryAiAssistant from '../ai/QueryAiAssistant.svelte';
+
   import { getCurrentSettings } from '../stores';
-  import { Messages } from 'openai/resources/chat/completions';
+
   import WidgetColumnBar from '../widgets/WidgetColumnBar.svelte';
   import WidgetsInnerContainer from '../widgets/WidgetsInnerContainer.svelte';
   import WidgetColumnBarItem from '../widgets/WidgetColumnBarItem.svelte';
@@ -264,13 +256,6 @@
   let queryRowsLimit = getInitialRowsLimit();
   $: localStorage.setItem(queryRowsLimitLocalStorageKey, queryRowsLimit ? queryRowsLimit.toString() : 'nolimit');
 
-  let isAiAssistantVisible = isProApp() && localStorage.getItem(`tabdata_isAiAssistantVisible_${tabid}`) == 'true';
-  let domAiAssistant;
-
-  $: if ($settingsValue?.['storage.disableAiFeatures']) {
-    isAiAssistantVisible = false;
-  }
-
   onMount(() => {
     intervalId = setInterval(async () => {
       if (!driver?.singleConnectionOnly && sessionId) {
@@ -288,7 +273,7 @@
 
   $: connection = useConnectionInfo({ conid });
   $: driver = findEngineDriver($connection, $extensions);
-  $: enableWrap = $currentEditorWrapEnabled || false;
+  $: enableWrap = $currentEditorWrapEnabled;
 
   $: effect = useEffect(() => {
     return onSession(sessionId);
@@ -376,10 +361,6 @@
     }
   }
 
-  export function toggleAiAssistant() {
-    isAiAssistantVisible = !isAiAssistantVisible;
-  }
-
   function getParameterSplitterOptions() {
     if (!queryParameterStyle) {
       return null;
@@ -429,7 +410,6 @@
       return;
     }
 
-    trackUsage({ feature: 'query', action: 'execute', tab: 'query', engine: driver?.engine, param: source });
     executeStartLine = startLine;
     executeNumber++;
     visibleResultTabs = true;
@@ -667,30 +647,6 @@
     errorMessages = errors;
   }
 
-  async function handleExplainError(errorObject) {
-    if (!isProApp() || isAiDisabled()) return;
-    isAiAssistantVisible = true;
-    await tick();
-    domAiAssistant?.explainError({
-      userQuery: $editorValue,
-      errorObject,
-    });
-  }
-
-  function handleSetFrontMatterField(field, value) {
-    const text = $editorValue;
-    setEditorData(
-      setSqlFrontMatter(
-        text,
-        {
-          ...getSqlFrontMatter(text, yaml),
-          [field]: value,
-        },
-        yaml
-      )
-    );
-  }
-
   export function toggleAutoExecute() {
     const frontMatter = getSqlFrontMatter($editorValue, yaml);
     setEditorData(
@@ -759,13 +715,10 @@
     initialArgs?.queryParameterStyle ??
     (initialArgs?.scriptTemplate == 'CALL OBJECT' ? ':' : '');
 
-  $: localStorage.setItem(`tabdata_isAiAssistantVisible_${tabid}`, isAiAssistantVisible ? 'true' : 'false');
 </script>
 
 <ToolStripContainer bind:this={domToolStrip} hideToolStrip={hideEditor}>
-  <HorizontalSplitter isSplitter={isAiAssistantVisible} initialSizeRight={300}>
-    <svelte:fragment slot="1">
-      <VerticalSplitter isSplitter={visibleResultTabs} initialValue={splitterInitialValue} hideFirst={hideEditor}>
+  <VerticalSplitter isSplitter={visibleResultTabs} initialValue={splitterInitialValue} hideFirst={hideEditor}>
         <svelte:fragment slot="1">
           {#if driver?.databaseEngineTypes?.includes('sql')}
             <SqlEditor
@@ -835,8 +788,6 @@
               invalidateCommands();
             }}
             onSaveQueryResult={saveQueryResult}
-            onSetFrontMatterField={handleSetFrontMatterField}
-            onGetFrontMatter={() => getSqlFrontMatter($editorValue, yaml)}
           >
             <svelte:fragment slot="0">
               <SocketMessageView
@@ -847,59 +798,12 @@
                 showProcedure
                 showLine
                 onChangeErrors={handleChangeErrors}
-                onExplainError={isProApp() ? handleExplainError : null}
                 engine={$connection && $connection.engine}
               />
             </svelte:fragment>
           </ResultTabs>
         </svelte:fragment>
       </VerticalSplitter>
-    </svelte:fragment>
-    <svelte:fragment slot="2">
-      <div class="ai-assistant-panel">
-        <WidgetColumnBar>
-          <WidgetColumnBarItem
-            title={_t('query.AiAssistant', { defaultMessage: 'AI Assistant' })}
-            onClose={() => {
-              isAiAssistantVisible = false;
-            }}
-            name="aiAssistant"
-            altsidebar
-          >
-            <WidgetsInnerContainer skipDefineWidth flexContainer>
-              <QueryAiAssistant
-                bind:this={domAiAssistant}
-                {conid}
-                {database}
-                {driver}
-                onClose={() => {
-                  isAiAssistantVisible = false;
-                }}
-                text={$editorValue}
-                getLine={() => domEditor.getEditor().getSelectionRange().start.row}
-                onInsertAtCursor={text => {
-                  const editor = domEditor.getEditor();
-                  editor.session.insert(editor.getCursorPosition(), text);
-                  domEditor?.getEditor()?.focus();
-                }}
-                getTextOrSelectedText={() => domEditor.getEditor().getSelectedText() || $editorValue}
-                onSetSelectedText={text => {
-                  const editor = domEditor.getEditor();
-                  if (editor.getSelectedText()) {
-                    const range = editor.selection.getRange();
-                    editor.session.replace(range, text);
-                  } else {
-                    editor.setValue(text);
-                  }
-                }}
-                {tabid}
-              />
-            </WidgetsInnerContainer>
-          </WidgetColumnBarItem>
-        </WidgetColumnBar>
-      </div>
-    </svelte:fragment>
-  </HorizontalSplitter>
   <svelte:fragment slot="toolstrip">
     <ToolStripCommandSplitButton
       commands={['query.execute', 'query.executeCurrent']}
@@ -944,11 +848,7 @@
       icon="icon at"
       title="Query parameter style"
     />
-    <ToolStripCommandButton
-      command="query.switchAiAssistant"
-      hideDisabled
-      data-testid="QueryTab_switchAiAssistantButton"
-    ></ToolStripCommandButton>
+
     <ToolStripCommandButton
       command="query.beginTransaction"
       data-testid="QueryTab_beginTransactionButton"
@@ -971,31 +871,6 @@
       hideDisabled
     />
 
-    {#if isProApp() && visibleResultTabs && !busy && hasPermission('dbops/charts')}
-      <ToolStripButton
-        icon="icon chart"
-        data-testid="QueryTab_openChartButton"
-        on:click={() => {
-          domResultTabs?.openCurrentChart();
-        }}
-      >
-        {_t('chart.open', { defaultMessage: 'Open chart' })}</ToolStripButton
-      >
-    {/if}
-    {#if isProApp() && !visibleResultTabs && hasPermission('dbops/charts')}
-      <ToolStripButton
-        icon="icon chart"
-        data-testid="QueryTab_detectChartButton"
-        on:click={() => {
-          autoDetectCharts = !autoDetectCharts;
-        }}
-      >
-        {_t('chart.detect', { defaultMessage: 'Detect chart' })}<FontIcon
-          icon={autoDetectCharts ? 'icon checkbox-marked' : 'icon checkbox-blank'}
-          padLeft
-        /></ToolStripButton
-      >
-    {/if}
     {#if driver?.isolationLevels}
       <ToolStripDropDownButton
         menu={() => [
@@ -1048,12 +923,3 @@
 {#if sessionId}
   <StatusBarTabItem icon={busy ? 'icon loading' : 'icon check'} text={busy ? 'Running...' : 'Finished'} />
 {/if}
-
-<style>
-  .ai-assistant-panel {
-    flex: 1;
-    display: flex;
-    background-color: var(--theme-altsidebar-background);
-    border-left: var(--theme-altsidebar-border);
-  }
-</style>

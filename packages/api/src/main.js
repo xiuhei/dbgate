@@ -29,12 +29,8 @@ const plugins = require('./controllers/plugins');
 const files = require('./controllers/files');
 const scheduler = require('./controllers/scheduler');
 const queryHistory = require('./controllers/queryHistory');
-const cloud = require('./controllers/cloud');
+
 const teamFiles = require('./controllers/teamFiles');
-const mcpAdmin = require('./controllers/mcpAdmin');
-const codex = require('./controllers/codex');
-const usageAnalytics = require('./controllers/usageAnalytics');
-const mcp = require('./mcp');
 
 const onFinished = require('on-finished');
 const processArgs = require('./utility/processArgs');
@@ -46,10 +42,8 @@ const _ = require('lodash');
 const { getLogger } = require('dbgate-tools');
 const { getDefaultAuthProvider } = require('./auth/authProvider');
 const { isBasicAuthActive } = require('./auth/authCommon');
-const startCloudUpgradeTimer = require('./utility/cloudUpgrade');
-const { isProApp } = require('./utility/checkLicense');
+
 const { getHealthStatus, getHealthStatusSprinx } = require('./utility/healthStatus');
-const { startCloudFiles } = require('./utility/cloudIntf');
 
 const logger = getLogger('main');
 
@@ -147,7 +141,7 @@ function start() {
   } else if (processArgs.runE2eTests) {
     registerExpressStatic(app, path.resolve('packer/build/public'));
   } else if (platformInfo.isNpmDist) {
-    registerExpressStatic(app, path.join(__dirname, isProApp() ? '../../dbgate-web-premium/public' : '../../dbgate-web/public'));
+    registerExpressStatic(app, path.join(__dirname, '../../dbgate-web/public'));
   } else if (process.env.DEVWEB) {
     registerExpressStatic(app, path.join(__dirname, '../../web/public'));
   } else {
@@ -201,16 +195,6 @@ function start() {
   app.use(bodyParser.json({ limit: '50mb' }));
   app.use(bodyParser.urlencoded({ extended: false }));
 
-  app.get(getExpressPath('/.well-known/oauth-protected-resource'), mcp.handleOAuthProtectedResourceMetadata);
-  app.get(getExpressPath('/.well-known/oauth-protected-resource/mcp'), mcp.handleOAuthProtectedResourceMetadata);
-  app.get(getExpressPath('/.well-known/oauth-authorization-server'), mcp.handleOAuthAuthorizationServerMetadata);
-  app.get(getExpressPath('/.well-known/openid-configuration'), mcp.handleOAuthAuthorizationServerMetadata);
-  app.get(getExpressPath('/authorize'), mcp.handleOAuthAuthorize);
-  app.post(getExpressPath('/token'), mcp.handleOAuthToken);
-  app.get(getExpressPath('/mcp/oauth/authorize'), mcp.handleOAuthAuthorize);
-  app.post(getExpressPath('/mcp/oauth/token'), mcp.handleOAuthToken);
-  app.post(getExpressPath('/mcp'), mcp.handleMcpRequest);
-
   app.use(
     getExpressPath('/uploads'),
     fileUpload({
@@ -231,15 +215,15 @@ function start() {
   if (platformInfo.isDocker) {
     const port = process.env.PORT || 3000;
     logger.info(`DBGM-00028 DbGate API listening on port ${port} (docker build)`);
-    server.listen(port);
+    server.listen(port, process.env.HOST);
   } else if (platformInfo.isAwsUbuntuLayout) {
     const port = process.env.PORT || 3000;
     logger.info(`DBGM-00029 DbGate API listening on port ${port} (AWS AMI build)`);
-    server.listen(port);
+    server.listen(port, process.env.HOST);
   } else if (platformInfo.isAzureUbuntuLayout) {
     const port = process.env.PORT || 3000;
     logger.info(`DBGM-00030 DbGate API listening on port ${port} (Azure VM build)`);
-    server.listen(port);
+    server.listen(port, process.env.HOST);
   } else if (platformInfo.isNpmDist) {
     getPort({
       port: parseInt(
@@ -247,18 +231,18 @@ function start() {
         process.env.PORT || 3000
       ),
     }).then(port => {
-      server.listen(port, () => {
+      server.listen(port, process.env.HOST, () => {
         logger.info(`DBGM-00031 DbGate API listening on port ${port} (NPM build)`);
       });
     });
   } else if (process.env.DEVWEB) {
     const port = process.env.PORT || 3000;
     logger.info(`DBGM-00032 DbGate API & web listening on port ${port} (dev web build)`);
-    server.listen(port);
+    server.listen(port, process.env.HOST);
   } else {
     const port = process.env.PORT || 3000;
     logger.info(`DBGM-00033 DbGate API listening on port ${port} (dev API build)`);
-    server.listen(port);
+    server.listen(port, process.env.HOST);
   }
 
   function shutdown() {
@@ -277,11 +261,6 @@ function start() {
   process.on('SIGTERM', shutdown);
   process.on('SIGBREAK', shutdown);
 
-  if (process.env.CLOUD_UPGRADE_FILE) {
-    startCloudUpgradeTimer();
-  }
-
-  startCloudFiles();
 }
 
 function useAllControllers(app, electron) {
@@ -302,12 +281,9 @@ function useAllControllers(app, electron) {
   useController(app, electron, '/query-history', queryHistory);
   useController(app, electron, '/apps', apps);
   useController(app, electron, '/auth', auth);
-  useController(app, electron, '/cloud', cloud);
   useController(app, electron, '/team-files', teamFiles);
   useController(app, electron, '/rest-connections', restConnections);
-  useController(app, electron, '/mcp-admin', mcpAdmin);
-  useController(app, electron, '/codex', codex);
-  useController(app, electron, '/usage-analytics', usageAnalytics);
+
 }
 
 function setElectronSender(electronSender) {

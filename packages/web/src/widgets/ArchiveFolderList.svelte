@@ -15,7 +15,6 @@
   import { useArchiveFolders } from '../utility/metadataLoaders';
   import WidgetsInnerContainer from './WidgetsInnerContainer.svelte';
   import InlineUploadButton from '../buttons/InlineUploadButton.svelte';
-  import { isProApp } from '../utility/proTools';
 
   let filter = '';
 
@@ -33,20 +32,6 @@
 <SearchBoxWrapper {filter}>
   <SearchInput placeholder="Search archive folders" bind:value={filter} />
   <CloseSearchButton bind:filter />
-
-  {#if isProApp()}
-    <InlineUploadButton
-      icon="icon upload"
-      filters={[
-        {
-          name: `All supported files`,
-          extensions: ['zip'],
-        },
-        { name: `ZIP files`, extensions: ['zip'] },
-      ]}
-      onProcessFile={handleUploadedFile}
-    />
-  {/if}
 
   <!-- {#if electron}
     <InlineButton on:click={handleOpenElectronFile} title="Add file" data-testid="ArchiveFolderList_uploadZipFile">

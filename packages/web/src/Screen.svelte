@@ -1,17 +1,7 @@
 <script>
   import WidgetContainer from './widgets/WidgetContainer.svelte';
   import WidgetIconPanel from './widgets/WidgetIconPanel.svelte';
-  import {
-    isFileDragActive,
-    leftPanelWidth,
-    openedSnackbars,
-    selectedWidget,
-    visibleWidgetSideBar,
-    visibleCommandPalette,
-    visibleTitleBar,
-    rightPanelWidget,
-    rightPanelWidth,
-  } from './stores';
+  import { isFileDragActive, leftPanelWidth, openedSnackbars, selectedWidget, visibleWidgetSideBar, visibleCommandPalette, visibleTitleBar } from './stores';
   import CommandPalette from './commands/CommandPalette.svelte';
   import splitterDrag from './utility/splitterDrag';
   import CurrentDropDownMenu from './modals/CurrentDropDownMenu.svelte';
@@ -25,7 +15,6 @@
   import getElectron from './utility/getElectron';
   import MultiTabsContainer from './tabpanel/MultiTabsContainer.svelte';
   import { currentThemeType } from './plugins/themes';
-  import RightWidgetContainer from './widgets/RightWidgetContainer.svelte';
 
   $: currentThemeTypeClass = $currentThemeType == 'dark' ? 'theme-type-dark' : 'theme-type-light';
 
@@ -70,18 +59,7 @@
       on:resizeSplitter={e => leftPanelWidth.update(x => x + e.detail)}
     />
   {/if}
-  {#if $rightPanelWidget}
-    <div
-      class="horizontal-split-handle right-splitter"
-      use:splitterDrag={'clientX'}
-      on:resizeSplitter={e => rightPanelWidth.update(x => x - e.detail)}
-    />
-  {/if}
-  {#if $rightPanelWidget}
-    <div class="rightpanel">
-      <RightWidgetContainer />
-    </div>
-  {/if}
+
   {#if $visibleCommandPalette}
     <div class="commads">
       <CommandPalette />

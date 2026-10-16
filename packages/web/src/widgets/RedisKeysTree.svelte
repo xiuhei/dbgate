@@ -15,14 +15,7 @@
   import SearchInput from '../elements/SearchInput.svelte';
   import FontIcon from '../icons/FontIcon.svelte';
   import { showModal } from '../modals/modalTools';
-  import {
-    activeRedisKeysStore,
-    currentDatabase,
-    focusedConnectionOrDatabase,
-    focusedTreeRedisKey,
-    getExtensions,
-    getFocusedTreeRedisKey,
-  } from '../stores';
+  import { activeRedisKeysStore, currentDatabase, focusedConnectionOrDatabase, focusedTreeRedisKey, getFocusedTreeRedisKey } from '../stores';
   import { apiCall, apiOff, apiOn } from '../utility/api';
   import { useConnectionInfo } from '../utility/metadataLoaders';
 

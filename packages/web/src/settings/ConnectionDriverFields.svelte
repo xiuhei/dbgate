@@ -26,7 +26,6 @@
   import { getConnectionLabel } from 'dbgate-tools';
   import { _t } from '../translations';
   import FormFileInputField from '../forms/FormFileInputField.svelte';
-  import FormClusterNodesField from '../forms/FormClusterNodesField.svelte';
 
   export let getDatabaseList;
   export let currentConnection;
@@ -55,7 +54,6 @@
     $values.passwordMode != 'askUser';
   $: showPasswordMode = driver?.showConnectionField('password', $values, showConnectionFieldArgs);
   $: isConnected = $openedConnections.includes($values._id) || $openedSingleDatabaseConnections.includes($values._id);
-  $: showMcpEnabled = driver && !$config?.storageDatabase;
 
   const awsRegions = [
     'us-east-1',
@@ -131,26 +129,6 @@
       }))}
     />
   {/key}
-{/if}
-
-{#if driver?.showConnectionField('clusterNodes', $values, showConnectionFieldArgs)}
-  <FormClusterNodesField
-    label={_t('connection.clusterNodes', { defaultMessage: 'Cluster nodes' })}
-    name="clusterNodes"
-    disabled={isConnected || isFormReadOnly || disabledFields.includes('clusterNodes')}
-    data-testid="ConnectionDriverFields_clusterNodes"
-  />
-{/if}
-
-{#if driver?.showConnectionField('autoDetectNatMap', $values, showConnectionFieldArgs)}
-  <FormCheckboxField
-    label={_t('connection.autoDetectNatMap', {
-      defaultMessage: 'Auto detect NAT map (use for Redis Cluster in Docker network)',
-    })}
-    name="autoDetectNatMap"
-    disabled={isConnected || isFormReadOnly}
-    data-testid="ConnectionDriverFields_autoDetectNatMap"
-  />
 {/if}
 
 {#if driver?.showConnectionField('databaseFile', $values, showConnectionFieldArgs)}
@@ -561,15 +539,6 @@
     name="isReadOnly"
     disabled={isConnected || isFormReadOnly}
     data-testid="ConnectionDriverFields_isReadOnly"
-  />
-{/if}
-
-{#if showMcpEnabled}
-  <FormCheckboxField
-    label={_t('connection.mcpEnabled', { defaultMessage: 'Available in MCP server' })}
-    name="mcpEnabled"
-    disabled={isConnected || isFormReadOnly}
-    data-testid="ConnectionDriverFields_mcpEnabled"
   />
 {/if}
 

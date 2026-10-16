@@ -9,7 +9,7 @@
 
   registerCommand({
     id: 'redisLikeData.saveNew',
-    usageAnalytics: false,
+
     group: 'save',
     category: __t('command.redisLikeData', { defaultMessage: 'Redis like data' }),
     name: __t('command.redisLikeData.save', { defaultMessage: 'Save' }),
@@ -23,7 +23,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import RedisValueDetail from '../redis/RedisValueDetail.svelte';
   import FormFieldTemplateLarge from '../forms/FormFieldTemplateLarge.svelte';
   import FormProvider from '../forms/FormProvider.svelte';
@@ -149,13 +149,7 @@
   }
 
   async function saveDataCore(callList) {
-    trackUsage({
-      feature: 'redis',
-      action: 'create_key',
-      tab: 'new_redis_key',
-      engine: $connection?.engine,
-      param: type,
-    });
+
     const resp = await apiCall('database-connections/multi-call-method', {
       conid,
       database,

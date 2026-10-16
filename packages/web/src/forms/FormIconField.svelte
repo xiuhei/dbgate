@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { createEventDispatcher } from 'svelte';
+
   import FontIcon from '../icons/FontIcon.svelte';
   import InlineButton from '../buttons/InlineButton.svelte';
   import { getFormContext } from './FormProviderCore.svelte';
@@ -37,7 +37,6 @@
     { icon: 'mdi mdi-file-video', name: 'Video File' },
     { icon: 'mdi mdi-file-music', name: 'Music File' },
     { icon: 'mdi mdi-archive', name: 'Archive' },
-
 
     // Core Applications
     { icon: 'mdi mdi-database', name: 'Database' },

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { PerspectiveTreeNode } from 'dbgate-datalib';
-  import type { ChangeConfigFunc, ChangePerspectiveConfigFunc, GridConfig, PerspectiveConfig } from 'dbgate-datalib';
+  import type { ChangePerspectiveConfigFunc, PerspectiveConfig } from 'dbgate-datalib';
   import { filterName } from 'dbgate-tools';
 
   import PerspectiveNodeRow from './PerspectiveNodeRow.svelte';

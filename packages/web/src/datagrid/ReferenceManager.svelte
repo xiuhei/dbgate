@@ -12,7 +12,6 @@
   import TokenizedFilteredText from '../widgets/TokenizedFilteredText.svelte';
 
   import { _t } from '../translations';
-  import { trackUsage } from '../utility/usageAnalytics';
 
   export let managerSize;
   export let display: GridDisplay;
@@ -23,7 +22,7 @@
 
   /** kind is 'reference' for a referenced table, 'dependency' for a dependent one. */
   function handleReferenceClick(kind, ref) {
-    trackUsage({ feature: 'data_grid', action: 'open_reference', param: kind }, tabid);
+
     onReferenceClick(ref);
   }
 

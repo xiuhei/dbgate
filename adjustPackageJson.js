@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const volatilePackages = require('./common/volatilePackages');
 
-function adjustFile(file, isApp = false) {
+function adjustFile(file) {
   const json = JSON.parse(fs.readFileSync(file, { encoding: 'utf-8' }));
 
   function processPackageFile(packageFile) {
@@ -38,38 +38,11 @@ function adjustFile(file, isApp = false) {
   }
 
   if (process.platform != 'win32') {
-    delete json.optionalDependencies.msnodesqlv8;
-  }
-
-  if (process.argv.includes('--community')) {
-    delete json.optionalDependencies['mongodb-client-encryption'];
-    delete json.dependencies['@mongosh/service-provider-node-driver'];
-    delete json.dependencies['@mongosh/browser-runtime-electron'];
-  }
-
-  if (isApp && process.argv.includes('--premium')) {
-    json.build.win.target = [
-      {
-        target: 'nsis',
-        arch: ['x64'],
-      },
-    ];
-    json.build.linux.target = [
-      {
-        target: 'AppImage',
-        arch: ['x64'],
-      },
-    ];
-    json.name = 'dbgate-premium';
-    json.build.artifactName = 'dbgate-premium-${version}-${os}_${arch}.${ext}';
-    json.build.appId = 'org.dbgate.premium';
-    json.build.productName = 'DbGate Premium';
+    if (json.optionalDependencies) delete json.optionalDependencies.msnodesqlv8;
   }
 
   fs.writeFileSync(file, JSON.stringify(json, null, 2), 'utf-8');
 }
 
 adjustFile('packages/api/package.json');
-adjustFile('app/package.json', true);
-
-fs.writeFileSync('common/useBundleExternals.js', "module.exports = 'true';", 'utf-8');
+adjustFile('app/package.json');

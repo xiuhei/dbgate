@@ -6,29 +6,13 @@
 
   import FontIcon from '../icons/FontIcon.svelte';
 
-  import {
-    activeTabId,
-    appUpdateStatus,
-    cloudSigninTokenHolder,
-    currentArchive,
-    currentDatabase,
-    extensions,
-    selectedWidget,
-    visibleCommandPalette,
-  } from '../stores';
+  import { activeTabId, currentDatabase, extensions, visibleCommandPalette } from '../stores';
   import { findEngineDriver, getConnectionLabel } from 'dbgate-tools';
-  import {
-    useConfig,
-    useConnectionList,
-    useDatabaseServerVersion,
-    useDatabaseStatus,
-    useRestStatus,
-  } from '../utility/metadataLoaders';
+  import { useConfig, useDatabaseServerVersion, useDatabaseStatus, useRestStatus } from '../utility/metadataLoaders';
   import { findCommand } from '../commands/runCommand';
   import { useConnectionColor } from '../utility/useConnectionColor';
   import { apiCall } from '../utility/api';
   import { statusBarTabInfo } from '../utility/statusBarStore';
-  import { isProApp } from '../utility/proTools';
 
   $: databaseName = $currentDatabase && $currentDatabase.name;
   $: connection = $currentDatabase && $currentDatabase.connection;
@@ -166,18 +150,7 @@
         </div>
       </div>
     {/if}
-    {#if isProApp() && $currentArchive && $currentArchive != 'default'}
-      <div
-        class="item flex clickable"
-        title="Current archive"
-        on:click={() => {
-          $selectedWidget = 'archive';
-        }}
-      >
-        <FontIcon icon="icon archive" padRight />
-        {$currentArchive}
-      </div>
-    {/if}
+
   </div>
   <div class="container">
     {#each contextItems || [] as item}
@@ -196,19 +169,6 @@
       </div>
     {/if}
 
-    {#if $cloudSigninTokenHolder?.email}
-      <div class="item">
-        <FontIcon icon="icon cloud" padRight />
-        {$cloudSigninTokenHolder?.email}
-      </div>
-    {/if}
-
-    {#if $appUpdateStatus}
-      <div class="item">
-        <FontIcon icon={$appUpdateStatus.icon} padRight />
-        {$appUpdateStatus.message}
-      </div>
-    {/if}
   </div>
 </div>
 

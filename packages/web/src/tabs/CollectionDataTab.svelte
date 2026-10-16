@@ -10,7 +10,7 @@
 
   registerCommand({
     id: 'collectionTable.save',
-    usageAnalytics: false,
+
     group: 'save',
     category: __t('command.collectionData', { defaultMessage: 'Collection data' }),
     name: __t('command.collectionData.save', { defaultMessage: 'Save' }),
@@ -24,7 +24,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import App from '../App.svelte';
   import DataGrid from '../datagrid/DataGrid.svelte';
   import useGridConfig from '../utility/useGridConfig';
@@ -123,12 +123,7 @@
   // $: console.log('LOADED ROWS MONGO', loadedRows);
 
   async function handleConfirmChange(changeSet) {
-    trackUsage({
-      feature: 'data_grid',
-      action: 'save_changes',
-      tab: 'collection_data',
-      engine: $connection?.engine,
-    });
+
     const resp = await apiCall('database-connections/update-collection', {
       conid,
       database,
@@ -174,7 +169,7 @@
   }
 
   function handleRunMacro(macro, params, cells) {
-    trackUsage({ feature: 'data_grid', action: 'run_macro', engine: $connection?.engine });
+
     const newChangeSet = runMacroOnChangeSet(macro, params, cells, $changeSetStore?.value, display, false);
     if (newChangeSet) {
       dispatchChangeSet({ type: 'set', value: newChangeSet });

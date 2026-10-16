@@ -1,18 +1,17 @@
 import { derived } from 'svelte/store';
-import { cloudConnectionsStore } from '../stores';
-import { useCloudContentList, useConnectionList } from '../utility/metadataLoaders';
+
+import { useConnectionList } from '../utility/metadataLoaders';
 import { getNormalizedUserColorName } from './userColors';
 
 export function getConnectionColor(
   connections,
-  cloudConnectionsStore,
   dbid,
   userColorTarget = 'foreground',
   cssStylePrefix = '',
   useConnectionFallback = true
 ) {
   if (!dbid || !connections) return undefined;
-  const current = connections.find(x => x._id == dbid.conid) ?? cloudConnectionsStore?.[dbid.conid];
+  const current = connections.find(x => x._id == dbid.conid) ;
   const { database } = dbid;
   let colorName = useConnectionFallback || !database ? current?.connectionColor : null;
   const dbConfig = (current?.databases || []).find(x => x.name == database);
@@ -27,18 +26,6 @@ export function getConnectionColor(
   return `${cssStylePrefix}var(--theme-usercolor-${userColorTarget}-${colorName})`;
 }
 
-export function getCloudContentColor(cloudContent, { cntid, folid }, cssStylePrefix = '') {
-  if (!cntid || !folid || !cloudContent) return undefined;
-  const current = cloudContent.flatMap(x => x.items).find(x => x.cntid == cntid && x.folid == folid);
-  let colorName = current?.contentAttributes?.connectionColor;
-  colorName = getNormalizedUserColorName(colorName);
-  if (!colorName) return undefined;
-  if (cssStylePrefix === '@rawColorWithoutVariable') {
-    return colorName;
-  }
-  return `${cssStylePrefix}var(--theme-usercolor-foreground-${colorName})`;
-}
-
 export function useConnectionColor(
   dbid,
   userColorTarget: 'foreground' | 'background' | 'statusbar' = 'foreground',
@@ -46,10 +33,9 @@ export function useConnectionColor(
   useConnectionFallback = true
 ) {
   const connections = useConnectionList();
-  return derived([connections, cloudConnectionsStore], ([$connections, $cloudConnectionsStore]) =>
+  return derived([connections], ([$connections]) =>
     getConnectionColor(
       $connections,
-      $cloudConnectionsStore,
       dbid,
       userColorTarget,
       cssStylePrefix,
@@ -65,12 +51,11 @@ export function useConnectionColorFactory(
 ) {
   const connections = useConnectionList();
   return derived(
-    [connections, cloudConnectionsStore],
-    ([$connections, $cloudConnectionsStore]) =>
+    [connections],
+    ([$connections]) =>
       (dbid = null, cssStylePrefixOverride = null, useConnectionFallbackOverride = null) => {
         const res = getConnectionColor(
           $connections,
-          $cloudConnectionsStore,
           dbid,
           userColorTarget,
           cssStylePrefixOverride ?? cssStylePrefix,
@@ -78,15 +63,5 @@ export function useConnectionColorFactory(
         );
         return res;
       }
-  );
-}
-
-export function useCloudContentColorFactory(cssStylePrefix = '') {
-  const contentList = useCloudContentList();
-  return derived(
-    [contentList],
-    ([$contentList]) =>
-      (idpack, cssStylePrefixOverride = null) =>
-        getCloudContentColor($contentList, idpack, cssStylePrefixOverride ?? cssStylePrefix)
   );
 }

@@ -10,7 +10,7 @@
   import { currentApplication, currentDatabase } from '../stores';
 
   import AppObjectCore from './AppObjectCore.svelte';
-  import { trackObjectTree } from './appObjectTools';
+
   import { showModal } from '../modals/modalTools';
   import ConfirmModal from '../modals/ConfirmModal.svelte';
   import InputTextModal from '../modals/InputTextModal.svelte';
@@ -23,7 +23,7 @@
   $: connections = useConnectionList();
 
   const handleDelete = () => {
-    trackObjectTree('delete', 'app_folder');
+
     showModal(ConfirmModal, {
       message: `Really delete application ${data.name}?`,
       onConfirm: () => {
@@ -33,7 +33,7 @@
   };
 
   const handleRename = () => {
-    trackObjectTree('rename', 'app_folder');
+
     const { name } = data;
 
     showModal(InputTextModal, {

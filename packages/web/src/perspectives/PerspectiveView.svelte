@@ -28,14 +28,7 @@
 </script>
 
 <script lang="ts">
-  import {
-    extractPerspectiveDatabases,
-    PerspectiveDataProvider,
-    PerspectiveTableNode,
-    PerspectiveTreeNode,
-    processPerspectiveDefaultColunns,
-    shouldProcessPerspectiveDefaultColunns,
-  } from 'dbgate-datalib';
+  import { extractPerspectiveDatabases, PerspectiveDataProvider, PerspectiveTableNode, processPerspectiveDefaultColunns, shouldProcessPerspectiveDefaultColunns } from 'dbgate-datalib';
   import type { ChangePerspectiveConfigFunc, PerspectiveConfig } from 'dbgate-datalib';
 
   import _ from 'lodash';
@@ -61,7 +54,7 @@
   import { useMultipleDatabaseInfo } from '../utility/useMultipleDatabaseInfo';
   import VerticalSplitter from '../elements/VerticalSplitter.svelte';
   import PerspectiveDesigner from './PerspectiveDesigner.svelte';
-  import { tick } from 'svelte';
+
   import { sleep } from '../utility/common';
   import FontIcon from '../icons/FontIcon.svelte';
   import InlineButton from '../buttons/InlineButton.svelte';

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount, setContext } from 'svelte';
   import { writable } from 'svelte/store';
-  import _, { get } from 'lodash';
+  import _, {  } from 'lodash';
   import { getLocalStorage, setLocalStorage } from '../utility/storageCache';
   import {
     computeInitialWidgetBarProps,

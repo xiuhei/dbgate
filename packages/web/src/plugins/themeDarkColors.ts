@@ -225,8 +225,7 @@ export const themeDarkColors = {
   '--theme-statusbar-button-foreground': 'var(--tw-color-zinc-800)',
   '--theme-statusbar-icon-error': 'var(--tw-color-red-300)',
   '--theme-statusbar-icon-ok': 'var(--tw-color-green-300)',
-  '--theme-aichat-user-background': 'var(--tw-color-sky-900)',
-  '--theme-aichat-assistant-background': 'var(--tw-color-zinc-900)',
+
   '--theme-applog-details-background': 'var(--tw-color-zinc-900)',
   '--theme-input-border': '1px solid var(--tw-color-zinc-700)',
   '--theme-input-border-hover': '1px solid var(--theme-input-border-hover-color)',
@@ -275,7 +274,7 @@ export const themeDarkColors = {
   '--theme-usercolor-background-purple': 'var(--tw-color-violet-800)',
   '--theme-usercolor-background-magenta': 'var(--tw-color-fuchsia-800)',
   '--theme-usercolor-background-grey': 'var(--tw-color-gray-800)',
-  
+
   '--theme-usercolor-statusbar-red': 'var(--tw-color-rose-700)',
   '--theme-usercolor-statusbar-orange': 'var(--tw-color-orange-700)',
   '--theme-usercolor-statusbar-yellow': 'var(--tw-color-yellow-700)',

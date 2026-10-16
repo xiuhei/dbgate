@@ -13,7 +13,7 @@
   import _ from 'lodash';
   import { createEventDispatcher } from 'svelte';
   import { onMount } from 'svelte';
-  import { commandsCustomized, visibleCommandPalette } from '../stores';
+  import { commandsCustomized } from '../stores';
   import { prepareMenuItems } from '../utility/contextMenu';
   import FontIcon from '../icons/FontIcon.svelte';
   import { formatKeyText } from '../utility/common';

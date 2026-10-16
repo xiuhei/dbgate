@@ -1,7 +1,6 @@
 <script lang="ts" context="module">
   import { _t } from '../translations';
   import { copyTextToClipboard } from '../utility/clipboard';
-  import { objectTreeUsage } from './appObjectTools';
 
   export const extractKey = props => props.name;
 
@@ -196,67 +195,6 @@
       disconnectDatabaseConnection(connection._id, name);
     };
 
-    const handleExportModel = async () => {
-      showModal(ExportDbModelModal, {
-        conid: connection._id,
-        database: name,
-      });
-      // const resp = await apiCall('database-connections/export-model', {
-      //   conid: connection._id,
-      //   database: name,
-      // });
-      // currentArchive.set(resp.archiveFolder);
-      // selectedWidget.set('archive');
-      // visibleWidgetSideBar.set(true);
-      // showSnackbarSuccess(`Saved to archive ${resp.archiveFolder}`);
-    };
-
-    const handleDatabaseChat = () => {
-      openNewTab({
-        title: 'Chat',
-        icon: 'img ai',
-        tabComponent: 'DatabaseChatTab',
-        props: {
-          conid: connection._id,
-          database: name,
-        },
-      });
-    };
-
-    const handleGraphQlChat = () => {
-      openNewTab({
-        title: 'GraphQL Chat',
-        icon: 'img ai',
-        tabComponent: 'GraphQlChatTab',
-        props: {
-          conid: connection._id,
-          database: name,
-        },
-      });
-    };
-
-    const handleCompareWithCurrentDb = () => {
-      openNewTab(
-        {
-          title: _t('database.compare', { defaultMessage: 'Compare' }),
-          icon: 'img compare',
-          tabComponent: 'CompareModelTab',
-          props: {
-            conid: $currentDatabase?.connection?._id,
-            database: $currentDatabase?.name,
-          },
-        },
-        {
-          editor: {
-            sourceConid: connection?._id,
-            sourceDatabase: name,
-            targetConid: $currentDatabase?.connection?._id,
-            targetDatabase: $currentDatabase?.name,
-          },
-        }
-      );
-    };
-
     // const handleOpenJsonModel = async () => {
     //   const db = await getDatabaseInfo({
     //     conid: connection._id,
@@ -282,43 +220,6 @@
       newQuery({
         title: _t('database.export', { defaultMessage: 'Export #' }),
         initialData: data,
-      });
-    };
-
-    const handleQueryDesigner = () => {
-      openNewTab({
-        title: _t('database.queryDesigner', { defaultMessage: 'Query #' }),
-        icon: 'img query-design',
-        tabComponent: 'QueryDesignTab',
-        focused: true,
-        props: {
-          conid: connection?._id,
-          database: name,
-        },
-      });
-    };
-
-    const handleNewPerspective = () => {
-      openNewTab({
-        title: _t('database.perspective', { defaultMessage: 'Perspective #' }),
-        icon: 'img perspective',
-        tabComponent: 'PerspectiveTab',
-        props: {
-          conid: connection?._id,
-          database: name,
-        },
-      });
-    };
-
-    const handleDatabaseProfiler = () => {
-      openNewTab({
-        title: _t('database.profiler', { defaultMessage: 'Profiler' }),
-        icon: 'img profiler',
-        tabComponent: 'ProfilerTab',
-        props: {
-          conid: connection?._id,
-          database: name,
-        },
       });
     };
 
@@ -354,7 +255,7 @@
             },
             {
               editor: `// @require ${extractPackageName(connection.engine)}
-        
+
 await dbgateApi.dropAllDbObjects(${JSON.stringify(
                 {
                   connection: extractShellConnection(connection, name),
@@ -419,32 +320,12 @@ await dbgateApi.executeQuery(${JSON.stringify(
       });
     };
 
-    const handleCreateNewApp = () => {
-      showModal(InputTextModal, {
-        header: _t('database.newApplication', { defaultMessage: 'New application' }),
-        label: _t('database.applicationName', { defaultMessage: 'Application name' }),
-        value: _.startCase(name),
-        onConfirm: async appName => {
-          const newAppId = await apiCall('apps/create-app-from-db', {
-            appName,
-            server: connection?.server,
-            database: name,
-          });
-          openApplicationEditor(newAppId);
-        },
-      });
-    };
-
     const driver = findEngineDriver(connection, getExtensions());
     const supportsNodejsDumper = driver?.supportsNodejsDumperForConnection?.(connection) ?? true;
     const supportsNodejsBackup = driver?.supportsNodejsBackup && supportsNodejsDumper;
     const supportsNodejsRestore = driver?.supportsNodejsRestore && supportsNodejsDumper;
-    const supportsBackup = isProApp()
-      ? driver?.supportsNativeBackup || supportsNodejsBackup
-      : supportsNodejsBackup;
-    const supportsRestore = isProApp()
-      ? driver?.supportsNativeRestore || supportsNodejsRestore
-      : supportsNodejsRestore;
+    const supportsBackup = supportsNodejsBackup;
+    const supportsRestore = supportsNodejsRestore;
 
     const commands = _.flatten((apps || []).map(x => Object.values(x.files || {}).filter(x => x.type == 'command')));
 
@@ -456,7 +337,7 @@ await dbgateApi.executeQuery(${JSON.stringify(
         driver?.supportExecuteQuery &&
         isAllowedDatabaseRunScript(databasePermissionRole) && {
           onClick: handleNewQuery,
-          usageAnalytics: objectTreeUsage('new_query', 'database', connection?.engine),
+
           text: _t('database.newQuery', { defaultMessage: 'New query' }),
           isNewQuery: true,
         },
@@ -464,34 +345,22 @@ await dbgateApi.executeQuery(${JSON.stringify(
         !connection.isReadOnly &&
         driver?.databaseEngineTypes?.includes('sql') && {
           onClick: handleNewTable,
-          usageAnalytics: objectTreeUsage('new_table', 'database', connection?.engine),
+
           text: _t('database.newTable', { defaultMessage: 'New table' }),
         },
       !connection.isReadOnly &&
         hasPermission(`dbops/model/edit`) &&
         driver?.databaseEngineTypes?.includes('document') && {
           onClick: handleNewCollection,
-          usageAnalytics: objectTreeUsage('new_collection', 'database', connection?.engine),
+
           text: _t('database.newCollection', {
             defaultMessage: 'New collection/container',
           }),
         },
-      hasPermission(`dbops/query`) &&
-        driver?.databaseEngineTypes?.includes('sql') &&
-        isProApp() && {
-          onClick: handleQueryDesigner,
-          usageAnalytics: objectTreeUsage('design_query', 'database', connection?.engine),
-          text: _t('database.designQuery', { defaultMessage: 'Design query' }),
-        },
-      driver?.databaseEngineTypes?.includes('sql') &&
-        isProApp() && {
-          onClick: handleNewPerspective,
-          usageAnalytics: objectTreeUsage('design_perspective', 'database', connection?.engine),
-          text: _t('database.designPerspectiveQuery', { defaultMessage: 'Design perspective query' }),
-        },
+
       connection.useSeparateSchemas && {
         onClick: handleRefreshSchemas,
-        usageAnalytics: objectTreeUsage('refresh_schemas', 'database', connection?.engine),
+
         text: _t('database.refreshSchemas', { defaultMessage: 'Refresh schemas' }),
       },
 
@@ -500,26 +369,26 @@ await dbgateApi.executeQuery(${JSON.stringify(
         !connection.isReadOnly &&
         hasPermission(`dbops/import`) && {
           onClick: handleImport,
-          usageAnalytics: objectTreeUsage('import', 'database', connection?.engine),
+
           text: _t('database.import', { defaultMessage: 'Import' }),
         },
       isSqlOrDoc &&
         hasPermission(`dbops/export`) && {
           onClick: handleExport,
-          usageAnalytics: objectTreeUsage('export', 'database', connection?.engine),
+
           text: _t('database.export', { defaultMessage: 'Export' }),
         },
       supportsRestore &&
         hasPermission(`dbops/sql-dump/import`) &&
         !connection.isReadOnly && {
           onClick: handleRestoreDatabase,
-          usageAnalytics: objectTreeUsage('restore_database', 'database', connection?.engine),
+
           text: _t('database.restoreDatabaseBackup', { defaultMessage: 'Restore database backup' }),
         },
       supportsBackup &&
         hasPermission(`dbops/sql-dump/export`) && {
           onClick: handleBackupDatabase,
-          usageAnalytics: objectTreeUsage('backup_database', 'database', connection?.engine),
+
           text: _t('database.createDatabaseBackup', { defaultMessage: 'Create database backup' }),
         },
       isSqlOrDoc &&
@@ -528,77 +397,34 @@ await dbgateApi.executeQuery(${JSON.stringify(
         isSqlOrDoc &&
         hasPermission(`dbops/dropdb`) && {
           onClick: handleDropDatabase,
-          usageAnalytics: objectTreeUsage('drop_database', 'database', connection?.engine),
+
           text: _t('database.dropDatabase', { defaultMessage: 'Drop database' }),
         },
       { divider: true },
       driver?.databaseEngineTypes?.includes('sql') && {
         onClick: handleCopyName,
-        usageAnalytics: objectTreeUsage('copy_name', 'database', connection?.engine),
+
         text: _t('database.copyDatabaseName', { defaultMessage: 'Copy database name' }),
       },
       driver?.databaseEngineTypes?.includes('sql') && {
         onClick: handleShowDiagram,
-        usageAnalytics: objectTreeUsage('show_diagram', 'database', connection?.engine),
+
         text: _t('database.showDiagram', { defaultMessage: 'Show diagram' }),
       },
       driver?.databaseEngineTypes?.includes('sql') &&
         hasPermission(`dbops/sql-generator`) && {
           onClick: handleSqlGenerator,
-          usageAnalytics: objectTreeUsage('sql_generator', 'database', connection?.engine),
+
           text: _t('database.sqlGenerator', { defaultMessage: 'SQL Generator' }),
         },
-      driver?.supportsDatabaseProfiler &&
-        isProApp() &&
-        hasPermission(`dbops/profiler`) && {
-          onClick: handleDatabaseProfiler,
-          usageAnalytics: objectTreeUsage('profiler', 'database', connection?.engine),
-          text: _t('database.databaseProfiler', { defaultMessage: 'Database profiler' }),
-        },
+
       // isSqlOrDoc &&
       //   isSqlOrDoc &&
       //   hasPermission(`dbops/model/view`) && { onClick: handleOpenJsonModel, text: 'Open model as JSON' },
-      isSqlOrDoc &&
-        isProApp() &&
-        hasPermission(`dbops/model/view`) && {
-          onClick: handleExportModel,
-          usageAnalytics: objectTreeUsage('export_model', 'database', connection?.engine),
-          text: _t('database.exportDbModel', { defaultMessage: 'Export DB model' }),
-        },
-      isProApp() &&
-        !isAiDisabled() &&
-        driver?.databaseEngineTypes?.includes('sql') &&
-        hasPermission('dbops/chat') && {
-          onClick: handleDatabaseChat,
-          usageAnalytics: objectTreeUsage('database_chat', 'database', connection?.engine),
-          text: _t('database.databaseChat', { defaultMessage: 'Database chat' }),
-        },
-      isProApp() &&
-        !isAiDisabled() &&
-        driver?.databaseEngineTypes?.includes('graphql') &&
-        hasPermission('dbops/chat') && {
-          onClick: handleGraphQlChat,
-          usageAnalytics: objectTreeUsage('graphql_chat', 'database', connection?.engine),
-          text: _t('database.graphqlChat', { defaultMessage: 'GraphQL chat' }),
-        },
-      isSqlOrDoc &&
-        _.get($currentDatabase, 'connection._id') &&
-        hasPermission('dbops/model/compare') &&
-        isProApp() &&
-        (_.get($currentDatabase, 'connection._id') != _.get(connection, '_id') ||
-          (_.get($currentDatabase, 'connection._id') == _.get(connection, '_id') &&
-            _.get($currentDatabase, 'name') != _.get(connection, 'name'))) && {
-          onClick: handleCompareWithCurrentDb,
-          usageAnalytics: objectTreeUsage('compare_models', 'database', connection?.engine),
-          text: _t('database.compareWithCurrentDb', {
-            defaultMessage: 'Compare with {name}',
-            values: { name: _.get($currentDatabase, 'name') },
-          }),
-        },
 
       driver?.databaseEngineTypes?.includes('keyvalue') && {
         onClick: handleGenerateScript,
-        usageAnalytics: objectTreeUsage('generate_script', 'database', connection?.engine),
+
         text: _t('database.generateScript', { defaultMessage: 'Generate script' }),
       },
 
@@ -606,7 +432,7 @@ await dbgateApi.executeQuery(${JSON.stringify(
         (_.get($currentDatabase, 'connection._id') == _.get(connection, '_id') &&
           _.get($currentDatabase, 'name') == name)) && {
         onClick: handleDisconnect,
-        usageAnalytics: objectTreeUsage('disconnect', 'database', connection?.engine),
+
         text: _t('database.disconnect', { defaultMessage: 'Disconnect' }),
       },
 
@@ -616,38 +442,21 @@ await dbgateApi.executeQuery(${JSON.stringify(
         hasPermission(`run-shell-script`) &&
         hasPermission(`dbops/dropdb`) && {
           onClick: handleGenerateDropAllObjectsScript,
-          usageAnalytics: objectTreeUsage('shell_drop_all_objects', 'database', connection?.engine),
+
           text: _t('database.shellDropAllObjects', { defaultMessage: 'Shell: Drop all objects' }),
         },
 
       hasPermission(`run-shell-script`) && {
         onClick: handleGenerateRunScript,
-        usageAnalytics: objectTreeUsage('shell_run_script', 'database', connection?.engine),
+
         text: _t('database.shellRunScript', { defaultMessage: 'Shell: Run script' }),
       },
 
       driver?.databaseEngineTypes?.includes('sql') &&
         hasPermission(`dbops/import`) && {
           onClick: handleShowDataDeployer,
-          usageAnalytics: objectTreeUsage('data_deployer', 'database', connection?.engine),
+
           text: _t('database.dataDeployer', { defaultMessage: 'Data deployer' }),
-        },
-
-      isProApp() &&
-        hasPermission(`files/apps/write`) && {
-          onClick: handleCreateNewApp,
-          usageAnalytics: objectTreeUsage('create_application', 'database', connection?.engine),
-          text: _t('database.createNewApplication', { defaultMessage: 'Create new application' }),
-        },
-
-      isProApp() &&
-        apps?.length > 0 && {
-          text: _t('database.editApplications', { defaultMessage: 'Edit application' }),
-          submenu: apps.map((app: any) => ({
-            text: app.applicationName,
-            onClick: () => openApplicationEditor(app.appid),
-            usageAnalytics: objectTreeUsage('edit_application', 'database', connection?.engine),
-          })),
         },
 
       { divider: true },
@@ -655,7 +464,7 @@ await dbgateApi.executeQuery(${JSON.stringify(
       commands.length > 0 && [
         commands.map((cmd: any) => ({
           text: cmd.label,
-          usageAnalytics: objectTreeUsage('app_command', 'database', connection?.engine),
+
           onClick: () => {
             showModal(ConfirmSqlModal, {
               sql: cmd.sql,
@@ -686,7 +495,6 @@ await dbgateApi.executeQuery(${JSON.stringify(
     getOpenedTabs,
     loadingSchemaLists,
     lockedDatabaseMode,
-    openedConnections,
     openedSingleDatabaseConnections,
     openedTabs,
     pinnedDatabases,
@@ -709,7 +517,7 @@ await dbgateApi.executeQuery(${JSON.stringify(
   import { openJsonDocument } from '../tabs/JsonTab.svelte';
   import { apiCall } from '../utility/api';
   import ErrorMessageModal from '../modals/ErrorMessageModal.svelte';
-  import ConfirmSqlModal, { runOperationOnDatabase, saveScriptToDatabase } from '../modals/ConfirmSqlModal.svelte';
+  import ConfirmSqlModal, { saveScriptToDatabase } from '../modals/ConfirmSqlModal.svelte';
   import { filterAppsForDatabase, openApplicationEditor } from '../utility/appTools';
   import newQuery from '../query/newQuery';
   import ConfirmModal from '../modals/ConfirmModal.svelte';
@@ -719,12 +527,12 @@ await dbgateApi.executeQuery(${JSON.stringify(
   import { openImportExportTab } from '../utility/importExportTools';
   import newTable from '../tableeditor/newTable';
   import { loadSchemaList, switchCurrentDatabase } from '../utility/common';
-  import { isProApp } from '../utility/proTools';
+
   import ExportDbModelModal from '../modals/ExportDbModelModal.svelte';
   import ChooseArchiveFolderModal from '../modals/ChooseArchiveFolderModal.svelte';
   import { extractShellConnection } from '../impexp/createImpExpScript';
   import { getNumberIcon } from '../icons/FontIcon.svelte';
-  import { getDatabaseClickActionSetting, isAiDisabled } from '../settings/settingsTools';
+  import { getDatabaseClickActionSetting } from '../settings/settingsTools';
   export let data;
   export let passProps;
   export let passExtInfo = undefined;

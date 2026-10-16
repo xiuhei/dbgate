@@ -98,29 +98,9 @@
     label: 'Import/Export file',
   };
 
-  const datadeploy: FileTypeHandler = isProApp()
-    ? {
-        icon: 'img data-deploy',
-        format: 'json',
-        tabComponent: 'DataDeployTab',
-        folder: 'datadeploy',
-        currentConnection: false,
-        extension: 'json',
-        label: 'Data deploy file',
-      }
-    : undefined;
+  const datadeploy: FileTypeHandler = undefined;
 
-  const dbcompare: FileTypeHandler = isProApp()
-    ? {
-        icon: 'img compare',
-        format: 'json',
-        tabComponent: 'CompareModelTab',
-        folder: 'dbcompare',
-        currentConnection: false,
-        extension: 'json',
-        label: 'Database compare file',
-      }
-    : undefined;
+  const dbcompare: FileTypeHandler = undefined;
 
   const perspectives: FileTypeHandler = {
     icon: 'img perspective',
@@ -152,17 +132,7 @@
     label: 'Theme file',
   };
 
-  const apps: FileTypeHandler = isProApp()
-    ? {
-        icon: 'img app',
-        format: 'json',
-        tabComponent: 'AppEditorTab',
-        folder: 'apps',
-        currentConnection: false,
-        extension: 'json',
-        label: 'Application file',
-      }
-    : undefined;
+  const apps: FileTypeHandler = undefined;
 
   export const SAVED_FILE_HANDLERS = {
     sql,
@@ -189,8 +159,7 @@
 
 <script lang="ts">
   import _ from 'lodash';
-  import { trackObjectTree } from './appObjectTools';
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import ConfirmModal from '../modals/ConfirmModal.svelte';
   import InputTextModal from '../modals/InputTextModal.svelte';
   import { showModal } from '../modals/modalTools';
@@ -202,7 +171,7 @@
   import openNewTab from '../utility/openNewTab';
 
   import AppObjectCore from './AppObjectCore.svelte';
-  import { isProApp } from '../utility/proTools';
+
   import { saveFileToDisk } from '../utility/exportFileTools';
   import { getConnectionInfo } from '../utility/metadataLoaders';
   import { showSnackbarError } from '../utility/snackbar';
@@ -214,7 +183,7 @@
   $: handler = SAVED_FILE_HANDLERS[folder] as FileTypeHandler;
 
   const showMarkdownPage = () => {
-    trackObjectTree('show_page', 'saved_file');
+
     openNewTab({
       title: data.file,
       icon: 'img markdown',
@@ -247,17 +216,12 @@
   }
 
   const handleDelete = () => {
-    trackObjectTree('delete', 'saved_file');
+
     showModal(ConfirmModal, {
       message: _t('common.reallyDeleteFile', { defaultMessage: 'Really delete file {file}?', values: { file: data.file } }),
       onConfirm: () => {
         if (data.teamFileId) {
           apiCall('team-files/delete', { teamFileId: data.teamFileId });
-        } else if (data.folid && data.cntid) {
-          apiCall('cloud/delete-content', {
-            folid: data.folid,
-            cntid: data.cntid,
-          });
         } else {
           apiCall('files/delete', data);
         }
@@ -266,7 +230,7 @@
   };
 
   const handleRename = () => {
-    trackObjectTree('rename', 'saved_file');
+
     showModal(InputTextModal, {
       value: data.file,
       label: _t('common.newFileName', { defaultMessage: 'New file name' }),
@@ -274,12 +238,6 @@
       onConfirm: newFile => {
         if (data.teamFileId) {
           apiCall('team-files/update', { teamFileId: data.teamFileId, name: newFile });
-        } else if (data.folid && data.cntid) {
-          apiCall('cloud/rename-content', {
-            folid: data.folid,
-            cntid: data.cntid,
-            name: newFile,
-          });
         } else {
           apiCall('files/rename', { ...data, newFile });
         }
@@ -288,7 +246,7 @@
   };
 
   const handleCopy = () => {
-    trackObjectTree('create_copy', 'saved_file');
+
     showModal(InputTextModal, {
       value: data.file,
       label: _t('savedFile.newFileName', { defaultMessage: 'New file name' }),
@@ -296,12 +254,6 @@
       onConfirm: newFile => {
         if (data.teamFileId) {
           apiCall('team-files/copy', { teamFileId: data.teamFileId, newName: newFile });
-        } else if (data.folid && data.cntid) {
-          apiCall('cloud/copy-file', {
-            folid: data.folid,
-            cntid: data.cntid,
-            name: newFile,
-          });
         } else {
           apiCall('files/copy', { ...data, newFile });
         }
@@ -310,18 +262,12 @@
   };
 
   const handleDownload = () => {
-    trackObjectTree('download', 'saved_file');
+
     saveFileToDisk(
       async filePath => {
         if (data.teamFileId) {
           return await apiCall('team-files/export-file', {
             teamFileId: data.teamFileId,
-            filePath,
-          });
-        } else if (data.folid && data.cntid) {
-          return await apiCall('cloud/export-file', {
-            folid: data.folid,
-            cntid: data.cntid,
             filePath,
           });
         } else {
@@ -338,7 +284,7 @@
 
   async function openTab() {
     // folder is the file type of the saved file, e.g. sql, shell, perspectives.
-    trackUsage({ feature: 'saved_file', action: 'open', param: folder });
+
     let dataContent;
     if (data.teamFileId) {
       if (data?.metadata?.autoExecute) {
@@ -354,12 +300,6 @@
       }
       const resp = await apiCall('team-files/get-content', {
         teamFileId: data.teamFileId,
-      });
-      dataContent = resp.content;
-    } else if (data.folid && data.cntid) {
-      const resp = await apiCall('cloud/get-content', {
-        folid: data.folid,
-        cntid: data.cntid,
       });
       dataContent = resp.content;
     } else {
@@ -396,8 +336,7 @@
           savedFile: data.file,
           savedFolder: handler.folder,
           savedFormat: handler.format,
-          savedCloudFolderId: data.folid,
-          savedCloudContentId: data.cntid,
+
           savedTeamFileId: data.teamFileId,
           hideEditor: data.teamFileId && data?.metadata?.autoExecute && !data.allowRead,
           ...connProps,

@@ -2,12 +2,6 @@
   import { __t } from '../translations';
   const HORIZONTAL_SCROLL_END_PADDING = 64;
   const getCurrentDataGrid = () => getActiveComponent('DataGridCore');
-  const getDataGridUsage = (action: string, value?: number) => ({
-    feature: 'data_grid',
-    action,
-    engine: getCurrentDataGrid()?.getDisplay()?.driver?.engine,
-    value,
-  });
 
   registerCommand({
     id: 'dataGrid.refresh',
@@ -17,7 +11,7 @@
     toolbar: true,
     isRelatedToTab: true,
     icon: 'icon reload',
-    usageAnalytics: () => getDataGridUsage('refresh'),
+
     testEnabled: () => getCurrentDataGrid()?.canRefresh(),
     onClick: () => getCurrentDataGrid().refresh(),
   });
@@ -30,7 +24,7 @@
     toolbar: true,
     isRelatedToTab: true,
     icon: 'icon reload',
-    usageAnalytics: () => getDataGridUsage('deep_refresh'),
+
     testEnabled: () => getCurrentDataGrid()?.canDeepRefresh(),
     onClick: () => getCurrentDataGrid().deepRefresh(),
   });
@@ -43,7 +37,7 @@
     icon: 'icon download',
     toolbar: true,
     isRelatedToTab: true,
-    usageAnalytics: () => getDataGridUsage('fetch_all'),
+
     testEnabled: () => getCurrentDataGrid()?.canFetchAll(),
     onClick: () => getCurrentDataGrid().fetchAll(),
   });
@@ -53,7 +47,7 @@
     category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
     name: __t('command.datagrid.revertRowChanges', { defaultMessage: 'Revert row changes' }),
     keyText: 'CtrlOrCommand+U',
-    usageAnalytics: () => getDataGridUsage('revert_rows'),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.containsChanges,
     onClick: () => getCurrentDataGrid().revertRowChanges(),
   });
@@ -64,7 +58,7 @@
     name: __t('command.datagrid.revertAllChanges', { defaultMessage: 'Revert all changes' }),
     toolbarName: __t('command.datagrid.revertAllChanges.toolbar', { defaultMessage: 'Revert all' }),
     icon: 'icon undo',
-    usageAnalytics: () => getDataGridUsage('revert_all'),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.containsChanges,
     onClick: () => getCurrentDataGrid().revertAllChanges(),
   });
@@ -76,7 +70,7 @@
     toolbarName: __t('command.datagrid.deleteSelectedRows.toolbar', { defaultMessage: 'Delete row(s)' }),
     keyText: isMac() ? 'Command+Backspace' : 'CtrlOrCommand+Delete',
     icon: 'icon minus',
-    usageAnalytics: () => getDataGridUsage('delete_rows', getCurrentDataGrid()?.getSelectedRowCount()),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.canDelete,
     onClick: () => getCurrentDataGrid().deleteSelectedRows(),
   });
@@ -88,7 +82,7 @@
     toolbarName: __t('command.datagrid.insertNewRow.toolbar', { defaultMessage: 'New row' }),
     icon: 'icon add',
     keyText: isMac() ? 'Command+I' : 'Insert',
-    usageAnalytics: () => getDataGridUsage('insert_row', 1),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.canInsert,
     onClick: () => getCurrentDataGrid().insertNewRow(),
   });
@@ -109,7 +103,7 @@
     name: __t('command.datagrid.cloneRows', { defaultMessage: 'Clone rows' }),
     toolbarName: __t('command.datagrid.cloneRows.toolbar', { defaultMessage: 'Clone row(s)' }),
     keyText: 'CtrlOrCommand+Shift+C',
-    usageAnalytics: () => getDataGridUsage('clone_rows', getCurrentDataGrid()?.getSelectedRowCount()),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.canInsert,
     onClick: () => getCurrentDataGrid().cloneRows(),
   });
@@ -142,7 +136,7 @@
     icon: 'icon undo',
     toolbar: true,
     isRelatedToTab: true,
-    usageAnalytics: () => getDataGridUsage('undo'),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.canUndo,
     onClick: () => getCurrentDataGrid().undo(),
   });
@@ -155,7 +149,7 @@
     icon: 'icon redo',
     toolbar: true,
     isRelatedToTab: true,
-    usageAnalytics: () => getDataGridUsage('redo'),
+
     testEnabled: () => getCurrentDataGrid()?.getGrider()?.canRedo,
     onClick: () => getCurrentDataGrid().redo(),
   });
@@ -174,7 +168,7 @@
     name: __t('command.datagrid.copyToClipboard', { defaultMessage: 'Copy to clipboard' }),
     keyText: 'CtrlOrCommand+C',
     disableHandleKeyText: 'CtrlOrCommand+C',
-    usageAnalytics: () => getDataGridUsage('copy'),
+
     testEnabled: () => getCurrentDataGrid() != null,
     onClick: () => getCurrentDataGrid().copyToClipboard(),
   });
@@ -250,7 +244,7 @@
     category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
     name: __t('command.datagrid.filterSelected', { defaultMessage: 'Filter selected value' }),
     keyText: 'CtrlOrCommand+Shift+F',
-    usageAnalytics: () => getDataGridUsage('filter_selected_value'),
+
     testEnabled: () => getCurrentDataGrid()?.getDisplay().filterable,
     onClick: () => getCurrentDataGrid().filterSelectedValue(),
   });
@@ -275,7 +269,7 @@
     category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
     name: __t('command.datagrid.clearFilter', { defaultMessage: 'Clear filter' }),
     keyText: 'CtrlOrCommand+Shift+E',
-    usageAnalytics: () => getDataGridUsage('clear_filter'),
+
     testEnabled: () => getCurrentDataGrid()?.clearFilterEnabled(),
     onClick: () => getCurrentDataGrid().clearFilter(),
   });
@@ -284,7 +278,7 @@
     category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
     name: __t('command.datagrid.generateSql', { defaultMessage: 'Generate SQL' }),
     keyText: 'CtrlOrCommand+G',
-    usageAnalytics: () => getDataGridUsage('generate_sql'),
+
     testEnabled: () => getCurrentDataGrid()?.generateSqlFromDataEnabled(),
     onClick: () => getCurrentDataGrid().generateSqlFromData(),
   });
@@ -309,16 +303,6 @@
     testEnabled: () => getCurrentDataGrid()?.editCellValueEnabled(),
     onClick: () => getCurrentDataGrid().editCellValue(),
   });
-
-  if (isProApp()) {
-    registerCommand({
-      id: 'dataGrid.sendToDataDeploy',
-      category: __t('command.datagrid', { defaultMessage: 'Data grid' }),
-      name: __t('command.datagrid.sendToDataDeployer', { defaultMessage: 'Send to data deployer' }),
-      testEnabled: () => getCurrentDataGrid()?.sendToDataDeployEnabled(),
-      onClick: () => getCurrentDataGrid().sendToDataDeploy(),
-    });
-  }
 
   // registerCommand({
   //   id: 'dataGrid.mergeSelectedCellsIntoMirror',
@@ -402,14 +386,7 @@
 
 <script lang="ts">
   import { GridDisplay, MacroDefinition } from 'dbgate-datalib';
-  import {
-    driverBase,
-    parseCellValue,
-    detectSqlFilterBehaviour,
-    stringifyCellValue,
-    shouldOpenMultilineDialog,
-    base64ToHex,
-  } from 'dbgate-tools';
+  import { driverBase, parseCellValue, detectSqlFilterBehaviour, shouldOpenMultilineDialog } from 'dbgate-tools';
   import { getContext, onDestroy, afterUpdate } from 'svelte';
   import { type Writable } from 'svelte/store';
   import _, { map } from 'lodash';
@@ -447,12 +424,7 @@
   import createReducer from '../utility/createReducer';
   import keycodes from '../utility/keycodes';
   import { copyRowsFormat, currentArchive } from '../stores';
-  import {
-    copyRowsFormatDefs,
-    copyRowsToClipboard,
-    copyTextToClipboard,
-    extractRowCopiedValue,
-  } from '../utility/clipboard';
+  import { copyRowsFormatDefs, copyRowsToClipboard, copyTextToClipboard } from '../utility/clipboard';
   import invalidateCommands from '../commands/invalidateCommands';
   import createRef from '../utility/createRef';
   import openReferenceForm, { openPrimaryKeyForm } from '../formview/openReferenceForm';
@@ -467,7 +439,7 @@
   import { showModal } from '../modals/modalTools';
   import FetchAllConfirmModal from '../modals/FetchAllConfirmModal.svelte';
   import StatusBarTabItem from '../widgets/StatusBarTabItem.svelte';
-  import runCommand, { findCommand } from '../commands/runCommand';
+  import runCommand, {  } from '../commands/runCommand';
   import { openJsonDocument } from '../tabs/JsonTab.svelte';
   import EditJsonModal from '../modals/EditJsonModal.svelte';
   import { apiCall } from '../utility/api';
@@ -482,11 +454,10 @@
   import contextMenuActivator from '../utility/contextMenuActivator';
   import InputTextModal from '../modals/InputTextModal.svelte';
   import { _t, _tval } from '../translations';
-  import { isProApp } from '../utility/proTools';
+
   import SaveArchiveModal from '../modals/SaveArchiveModal.svelte';
   import hasPermission from '../utility/hasPermission';
   import macros from '../macro/macros';
-  import { trackUsage } from '../utility/usageAnalytics';
 
   export let onLoadNextData = undefined;
   export let onFetchAllRows = undefined;
@@ -532,7 +503,7 @@
   export let hideGridLeftColumn = false;
   export let overlayDefinition = null;
   export let onGetSelectionMenu = null;
-  export let onOpenChart = null;
+
   export let macroCondition = null;
 
   export const activator = createActivator('DataGridCore', false);
@@ -569,14 +540,6 @@
 
   const tabid = getContext('tabid');
 
-  function trackGridAction(action, callback, param = undefined) {
-    trackGridUsage({ feature: 'data_grid', action, param });
-    return callback();
-  }
-
-  function trackGridUsage(event) {
-    trackUsage({ engine: display?.driver?.engine, ...event }, tabid);
-  }
   const selectedMacro = getContext('selectedMacro') as Writable<MacroDefinition>;
 
   let unsubscribeDbRefresh;
@@ -1177,7 +1140,7 @@
         text: `${fk.refTableName} (${fk.columns.map(x => x.columnName).join(', ')})`,
         icon: 'img link',
         onClick: () => {
-          trackGridUsage({ feature: 'data_grid', action: 'open_reference', param: 'reference' });
+
           onReferenceClick({
             schemaName: fk.refSchemaName,
             pureName: fk.refTableName,
@@ -1195,7 +1158,7 @@
         text: `${fk.pureName} (${fk.columns.map(x => x.columnName).join(', ')})`,
         icon: 'img reference',
         onClick: () => {
-          trackGridUsage({ feature: 'data_grid', action: 'open_reference', param: 'dependency' });
+
           onReferenceClick({
             schemaName: fk.schemaName,
             pureName: fk.pureName,
@@ -2024,7 +1987,7 @@
   }
 
   async function handlePaste(event) {
-    trackGridUsage({ feature: 'data_grid', action: 'paste' });
+
     var pastedText = undefined;
     // @ts-ignore
     if (window.clipboardData && window.clipboardData.getData) {
@@ -2250,17 +2213,7 @@
     { command: 'dataGrid.loadCellFromFile', hideDisabled: true },
     { command: 'dataGrid.toggleCellDataView', hideDisabled: true },
     { command: 'gqlConnection.toggleCellDataView', hideDisabled: true },
-    isProApp() && {
-      text: _t('datagrid.useMacro', { defaultMessage: 'Use macro' }),
-      submenu: macros
-        .filter(macro => !macroCondition || macroCondition(macro))
-        .map(macro => ({
-          text: _tval(macro.title),
-          onClick: () => {
-            selectedMacro.set(macro);
-          },
-        })),
-    },
+    false,
     // { command: 'dataGrid.copyJsonDocument', hideDisabled: true },
     { divider: true },
     { placeTag: 'export' },
@@ -2275,13 +2228,8 @@
     //     { command: 'dataGrid.replaceSelectedRowsIntoMirror' },
     //   ],
     // },
-    isProApp() && { command: 'dataGrid.sendToDataDeploy' },
-    isProApp() &&
-      hasPermission('dbops/charts') &&
-      onOpenChart && {
-        text: _t('datagrid.openChart', { defaultMessage: 'Open chart' }),
-        onClick: () => onOpenChart(),
-      },
+    false,
+    false,
     { command: 'dataGrid.generateSqlFromData' },
     { command: 'dataGrid.openFreeTable' },
     { command: 'dataGrid.openSelectionInMap', hideDisabled: true },
@@ -2445,22 +2393,22 @@
                   {conid}
                   {database}
                   setSort={display.sortable
-                    ? order => trackGridAction('sort', () => display.setSort(col.uniqueName, order), order)
+                    ? order => display.setSort(col.uniqueName, order)
                     : null}
                   addToSort={display.sortable
-                    ? order => trackGridAction('add_sort', () => display.addToSort(col.uniqueName, order), order)
+                    ? order => display.addToSort(col.uniqueName, order)
                     : null}
                   order={display.sortable ? display.getSortOrder(col.uniqueName) : null}
                   orderIndex={display.sortable ? display.getSortOrderIndex(col.uniqueName) : -1}
                   isSortDefined={display.sortable ? display.isSortDefined() : false}
-                  clearSort={display.sortable ? () => trackGridAction('clear_sort', () => display.clearSort()) : null}
+                  clearSort={display.sortable ? () => display.clearSort() : null}
                   on:resizeSplitter={e => {
                     // @ts-ignore
                     display.resizeColumn(col.uniqueName, col.width, e.detail);
                   }}
                   setGrouping={display.groupable
                     ? groupFunc =>
-                        trackGridAction('set_grouping', () => display.setGrouping(col.uniqueName, groupFunc), groupFunc)
+                        display.setGrouping(col.uniqueName, groupFunc)
                     : null}
                   grouping={display.getGrouping(col.uniqueName)}
                   {allowDefineVirtualReferences}
@@ -2519,7 +2467,7 @@
                       col.filterBehaviour ??
                       detectSqlFilterBehaviour(col.dataType)}
                     filter={display.getFilter(col.uniqueName)}
-                    setFilter={value => trackGridAction('set_filter', () => display.setFilter(col.uniqueName, value))}
+                    setFilter={value => display.setFilter(col.uniqueName, value)}
                     showResizeSplitter
                     on:resizeSplitter={e => {
                       // @ts-ignore

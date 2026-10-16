@@ -15,7 +15,7 @@
     fileExtension: 'js',
 
     execute: true,
-    executeUsageAnalytics: false,
+
     toggleComment: true,
     findReplace: true,
     defaultTeamFolder: true,
@@ -35,7 +35,7 @@
 </script>
 
 <script lang="ts">
-  import { trackUsage } from '../utility/usageAnalytics';
+
   import { getContext } from 'svelte';
   import ToolStripCommandButton from '../buttons/ToolStripCommandButton.svelte';
   import ToolStripContainer from '../buttons/ToolStripContainer.svelte';
@@ -153,7 +153,7 @@
 
   export async function execute() {
     if (busy) return;
-    trackUsage({ feature: 'shell', action: 'execute', tab: 'shell' });
+
     executeNumber += 1;
 
     let runid = runnerId;

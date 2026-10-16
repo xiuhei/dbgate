@@ -3,7 +3,6 @@ SHELL_SCRIPTING=1
 # LOCAL_DBGATE_CLOUD=1
 # LOCAL_DBGATE_IDENTITY=1
 
-# CLOUD_UPGRADE_FILE=c:\test\upg\upgrade.zip
 
 # PERMISSIONS=~widgets/app,~widgets/plugins
 # DISABLE_SHELL=1

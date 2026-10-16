@@ -3,24 +3,19 @@
   import FormFieldTemplateLarge from '../forms/FormFieldTemplateLarge.svelte';
   import SelectField from '../forms/SelectField.svelte';
   import FormStyledButton from '../buttons/FormStyledButton.svelte';
-  import {
-    currentEditorFontSize,
-    currentEditorTheme,
-    rightPanelWidget,
-  } from '../stores';
+  import { currentEditorFontSize, currentEditorTheme } from '../stores';
   import { _t } from '../translations';
   import ThemeSkeleton from './ThemeSkeleton.svelte';
   import { EDITOR_THEMES, FONT_SIZES } from '../query/AceEditor.svelte';
   import TextField from '../forms/TextField.svelte';
   import FormTextField from '../forms/FormTextField.svelte';
   import SqlEditor from '../query/SqlEditor.svelte';
-  import { isProApp } from '../utility/proTools';
+
   import { currentThemeDefinition, getBuiltInTheme, getSystemThemeType, getBuiltInThemes, saveThemeToLocalFile } from '../plugins/themes';
-  import { apiCall } from '../utility/api';
-  import { showModal } from '../modals/modalTools';
+
   import InputTextModal from '../modals/InputTextModal.svelte';
-  import { useFileThemes, usePublicCloudFiles } from '../utility/metadataLoaders';
-  
+  import { useFileThemes } from '../utility/metadataLoaders';
+
     const sqlPreview = `-- example query
 SELECT
   MAX(Album.AlbumId) AS max_album,
@@ -42,23 +37,12 @@ ORDER BY
   }
 
   const fileThemes = useFileThemes();
-  const publicCloudFiles = usePublicCloudFiles();
+
   $: allThemes = [
     ...getBuiltInThemes(),
     ...($fileThemes || []),
-    ...($publicCloudFiles || [])
-      ?.filter(x => x.type == 'theme')
-      ?.map(x => ({
-        themeName: x.title,
-        themePublicCloudPath: x.path,
-        ...x.attributes,
-      })),
   ];
 
-  // $: console.log(
-  //   'THEME CLOUD',
-  //   ($publicCloudFiles || [])?.filter(x => x.type == 'theme')
-  // );
 </script>
 
 <div class="wrapper">
@@ -102,15 +86,6 @@ ORDER BY
       on:click={handleSaveTheme}
     />
 
-    {#if isProApp()}
-      <FormStyledButton
-        skipWidth
-        value={_t('theme.customizeWithAi', { defaultMessage: 'Customize with AI Assistant' })}
-        on:click={() => {
-          $rightPanelWidget = 'themeAiAssistant';
-        }}
-      />
-    {/if}
   </div>
 
   <div class="heading">{_t('settings.appearance.editorTheme', { defaultMessage: 'Editor theme' })}</div>
@@ -197,10 +172,4 @@ ORDER BY
     margin-bottom: var(--dim-large-form-margin);
   }
 
-  .ai-assistant-panel {
-    flex: 1;
-    display: flex;
-    background-color: var(--theme-altsidebar-background);
-    border-left: var(--theme-altsidebar-border);
-  }
 </style>
